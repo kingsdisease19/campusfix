@@ -25,40 +25,48 @@
     <!-- Full Name -->
     <div class="mb-3">
       <label for="name" class="form-label fw-semibold">Full Name</label>
-      <input
-        type="text"
-        id="name"
-        name="name"
-        class="form-control"
-        placeholder="e.g. Chanda Mwansa"
-        required
-      />
+      <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Chanda Mwansa" required />
     </div>
 
     <!-- Email -->
     <div class="mb-3">
       <label for="email" class="form-label fw-semibold">Email Address</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        class="form-control"
-        placeholder="e.g. chanda@student.unza.zm"
-        required
-      />
+      <input type="email" id="email" name="email" class="form-control" placeholder="e.g. chanda@student.unza.zm"
+        required />
+    </div>
+
+    <!-- University -->
+    <div class="mb-3">
+      <label for="university" class="form-label fw-semibold">University or College</label>
+      <select id="university" name="university" class="form-select" required>
+        <option value="" disabled selected>Select your institution...</option>
+        <option value="University of Zambia (UNZA)">University of Zambia (UNZA)</option>
+        <option value="Copperbelt University">Copperbelt University</option>
+        <option value="Mulungushi University">Mulungushi University</option>
+        <option value="Kwame Nkrumah University">Kwame Nkrumah University</option>
+        <option value="Chalimbana University">Chalimbana University</option>
+        <option value="Mukuba University">Mukuba University</option>
+        <option value="NIPA">NIPA</option>
+        <option value="Evelyn Hone College">Evelyn Hone College</option>
+        <option value="ZCAS University">ZCAS University</option>
+        <option value="Cavendish University Zambia">Cavendish University Zambia</option>
+        <option value="Texila American University">Texila American University</option>
+        <option value="DMI St Eugene University">DMI St Eugene University</option>
+        <option value="Lusaka Apex Medical University">Lusaka Apex Medical University</option>
+        <option value="Levy Mwanawasa Medical University">Levy Mwanawasa Medical University</option>
+        <option value="Rockview University">Rockview University</option>
+        <option value="Northrise University">Northrise University</option>
+        <option value="Rusangu University">Rusangu University</option>
+        <option value="Zambia Catholic University">Zambia Catholic University</option>
+        <option value="Livingstone International University">Livingstone International University</option>
+      </select>
     </div>
 
     <!-- Password -->
     <div class="mb-4">
       <label for="password" class="form-label fw-semibold">Password</label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        class="form-control"
-        placeholder="At least 6 characters"
-        required
-      />
+      <input type="password" id="password" name="password" class="form-control" placeholder="At least 6 characters"
+        required />
       <div class="form-text">Your password will be stored securely.</div>
     </div>
 
@@ -70,7 +78,7 @@
   </form>
 
   <!-- Link to login page -->
-  <hr class="my-4"/>
+  <hr class="my-4" />
   <p class="text-center text-muted mb-0" style="font-size:.9rem;">
     Already have an account?
     <a href="/login" class="text-decoration-none fw-semibold">Log in here</a>

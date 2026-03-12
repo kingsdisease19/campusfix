@@ -1,29 +1,119 @@
-<!-- ============================================================
-     templates/dashboard.html
-     Simple page shown to logged-in users
-     ============================================================ -->
 {% extends "base.html" %}
+
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="dashboard-card">
+<style>
+  /* Dashboard layout */
+  .dashboard-header {
+    background: linear-gradient(135deg, #0d6efd 0%, #1a3fce 100%);
+    color: #fff;
+    padding: 60px 0 50px;
+    margin-bottom: 2rem;
+  }
 
-  <div class="mb-3" style="font-size:3rem;">✅</div>
-  <h2 class="fw-800 mb-1">Hey, {{ name }}!</h2>
-  <p class="text-muted mb-4">You are successfully logged in to CampusFix.</p>
+  .dashboard-header h1 {
+    font-weight: 800;
+    font-size: 2.2rem;
+  }
 
-  <div class="bg-light rounded-3 p-3 mb-4 text-start">
-    <p class="mb-1 fw-semibold">🎓 You're all set!</p>
-    <p class="text-muted small mb-0">
-      This is your dashboard. You can start posting tech problems
-      or browsing jobs to help other students.
-    </p>
+  .dashboard-header .badge-uni {
+    background: rgba(255, 255, 255, 0.2);
+    padding: .4rem 1rem;
+    border-radius: 20px;
+    font-size: .9rem;
+    font-weight: 600;
+  }
+
+  /* Cards */
+  .card {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .07);
+  }
+
+  .badge-cat {
+    background: #e8eeff;
+    color: #0d6efd;
+    font-size: .75rem;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: .25rem .75rem;
+  }
+
+  .budget {
+    background: #dcfce7;
+    color: #16a34a;
+    font-size: .8rem;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: .2rem .6rem;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px dashed #ced4da;
+  }
+
+  .empty-state .icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Dashboard Header -->
+<div class="dashboard-header text-center">
+  <div class="container">
+    <div class="mb-3" style="font-size:3rem;">👋</div>
+    <h1 class="mb-3">Welcome back, {{ name }}!</h1>
+    <div class="badge-uni d-inline-block">
+      <i class="bi bi-building me-2"></i>{{ university }}
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">Your Posted Jobs</h3>
+    <a href="/post-job" class="btn btn-primary fw-bold px-4">
+      <i class="bi bi-plus-circle me-1"></i>Post a Job
+    </a>
   </div>
 
-  <!-- Logout button -->
-  <a href="/logout" class="btn btn-outline-danger rounded-3 px-4">
-    <i class="bi bi-box-arrow-right me-2"></i>Log Out
-  </a>
-
+  {% if jobs %}
+  <div class="row g-4">
+    {% for job in jobs %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card p-4 h-100">
+        <span class="badge-cat mb-2 d-inline-block align-self-start">
+          <i class="bi bi-tag me-1"></i>{{ job.category }}
+        </span>
+        <h5 class="fw-bold">{{ job.title }}</h5>
+        <p class="text-muted small mb-3">
+          {{ job.description[:100] }}{% if job.description|length > 100 %}...{% endif %}
+        </p>
+        <div class="d-flex justify-content-between align-items-center mt-auto">
+          <span class="budget">
+            <i class="bi bi-cash me-1"></i>K{{ job.budget }}
+          </span>
+          <a href="/job/{{ job.id }}" class="btn btn-outline-primary btn-sm">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">📝</div>
+    <h5 class="fw-bold text-dark">No active jobs</h5>
+    <p>You haven't posted any jobs yet.</p>
+    <a href="/post-job" class="btn btn-primary px-4 mt-2">Post Your First Job</a>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

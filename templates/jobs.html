@@ -1,248 +1,169 @@
-<!-- ============================================================
-     templates/jobs.html
-     Save in:  campusfix/templates/jobs.html
-     Browse all posted jobs as Bootstrap cards
-     ============================================================ -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CampusFix – Browse Jobs</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
-  <style>
-    body { background: #f0f4ff; font-family: 'Segoe UI', sans-serif; }
+{% extends "base.html" %}
 
-    .navbar { background: #fff; border-bottom: 1px solid #e5e7eb; }
-    .navbar-brand { font-weight: 800; font-size: 1.4rem; color: #0d6efd !important; }
-    .navbar-brand span { color: #f59e0b; }
+{% block title %}Browse Jobs{% endblock %}
 
-    /* Page header */
-    .page-header {
-      background: linear-gradient(135deg, #0d6efd 0%, #1a3fce 100%);
-      color: #fff;
-      padding: 50px 0 40px;
-    }
-    .page-header h1 { font-weight: 800; }
+{% block content %}
+<style>
+  /* Page header */
+  .page-header {
+    background: linear-gradient(135deg, #0d6efd 0%, #1a3fce 100%);
+    color: #fff;
+    padding: 50px 0 40px;
+  }
 
-    /* Filter pills */
-    .filter-pill {
-      border: 2px solid #dee2e6;
-      border-radius: 30px;
-      padding: .35rem 1rem;
-      font-size: .82rem;
-      font-weight: 600;
-      color: #6b7280;
-      text-decoration: none;
-      transition: all .15s;
-      background: #fff;
-      display: inline-block;
-    }
-    .filter-pill:hover,
-    .filter-pill.active {
-      border-color: #0d6efd;
-      background: #e8eeff;
-      color: #0d6efd;
-    }
+  .page-header h1 {
+    font-weight: 800;
+  }
 
-    /* Job card */
-    .job-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 1.5rem;
-      height: 100%;
-      transition: box-shadow .2s, transform .2s;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
-    .job-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0,0,0,.09);
-      color: inherit;
-    }
+  /* Filter pills */
+  .filter-pill {
+    border: 2px solid #dee2e6;
+    border-radius: 30px;
+    padding: .35rem 1rem;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-decoration: none;
+    transition: all .15s;
+    background: #fff;
+    display: inline-block;
+  }
 
-    .cat-badge {
-      font-size: .75rem;
-      font-weight: 600;
-      background: #e8eeff;
-      color: #0d6efd;
-      padding: .2rem .7rem;
-      border-radius: 20px;
-      display: inline-block;
-      margin-bottom: .7rem;
-    }
-    .job-card h5 { font-weight: 700; font-size: 1rem; margin-bottom: .4rem; }
-    .job-card p  { font-size: .88rem; color: #6b7280; margin-bottom: 1rem; }
+  .filter-pill:hover,
+  .filter-pill.active {
+    border-color: #0d6efd;
+    background: #e8eeff;
+    color: #0d6efd;
+  }
 
-    .budget-tag {
-      background: #dcfce7;
-      color: #16a34a;
-      font-weight: 600;
-      font-size: .82rem;
-      padding: .2rem .65rem;
-      border-radius: 6px;
-    }
-    .poster-info { font-size: .8rem; color: #9ca3af; }
+  /* Cards */
+  .card {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .07);
+  }
 
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #9ca3af;
-    }
-    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
-  </style>
-</head>
-<body>
+  .badge-cat {
+    background: #e8eeff;
+    color: #0d6efd;
+    font-size: .75rem;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: .25rem .75rem;
+  }
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container">
-      <a class="navbar-brand" href="/">Campus<span>Fix</span></a>
-      <div class="ms-auto d-flex gap-2 align-items-center">
-        <a href="/post-job" class="btn btn-primary btn-sm px-3">
-          <i class="bi bi-plus-circle me-1"></i>Post a Job
-        </a>
-        {% if name %}
-          <span class="text-muted small d-none d-md-inline">
-            <i class="bi bi-person-circle me-1"></i>{{ name }}
-          </span>
-          <a href="/logout" class="btn btn-outline-danger btn-sm">Logout</a>
-        {% else %}
-          <a href="/login"    class="btn btn-outline-primary btn-sm">Login</a>
-          <a href="/register" class="btn btn-outline-secondary btn-sm">Register</a>
-        {% endif %}
-      </div>
-    </div>
-  </nav>
+  .budget {
+    background: #dcfce7;
+    color: #16a34a;
+    font-size: .8rem;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: .2rem .6rem;
+  }
 
-  <!-- Flash messages -->
-  <div class="container mt-3">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-  </div>
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+  }
 
-  <!-- Page header -->
-  <div class="page-header">
-    <div class="container">
+  .empty-state .icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Page header -->
+<div class="page-header">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div>
       <h1>Browse Tech Jobs</h1>
-      <p class="mb-0" style="opacity:.85;">
-        Pick a problem you can fix and help a fellow student
-      </p>
+      <p class="mb-0" style="opacity:.85;">Pick a problem you can fix and help a fellow student</p>
+    </div>
+    <div>
+      <a href="/post-job" class="btn btn-light fw-bold">Post a Job</a>
     </div>
   </div>
+</div>
 
-  <!-- Main content -->
-  <div class="container py-5">
+<div class="container py-5">
+  <!-- Category filters -->
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="/jobs{% if selected_university %}?university={{ selected_university|urlencode }}{% endif %}"
+      class="filter-pill {% if not selected_category %}active{% endif %}">All Jobs</a>
+    <a href="/jobs?category=Networking{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
+      class="filter-pill {% if selected_category == 'Networking' %}active{% endif %}">Networking</a>
+    <a href="/jobs?category=OS / Linux{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
+      class="filter-pill {% if selected_category == 'OS / Linux' %}active{% endif %}">OS / Linux</a>
+    <a href="/jobs?category=Programming{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
+      class="filter-pill {% if selected_category == 'Programming' %}active{% endif %}">Programming</a>
+    <a href="/jobs?category=Hardware{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
+      class="filter-pill {% if selected_category == 'Hardware' %}active{% endif %}">Hardware</a>
+    <a href="/jobs?category=Software{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
+      class="filter-pill {% if selected_category == 'Software' %}active{% endif %}">Software</a>
+    <a href="/jobs?category=Other{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
+      class="filter-pill {% if selected_category == 'Other' %}active{% endif %}">Other</a>
 
-    <!-- Category filters -->
-    <div class="d-flex flex-wrap gap-2 mb-4">
-      <!--
-        Each link passes ?category=... to the /jobs route.
-        "selected_category" is the current filter sent from app.py.
-      -->
-      <a href="/jobs"
-         class="filter-pill {% if not selected_category %}active{% endif %}">
-        All Jobs
-      </a>
-      <a href="/jobs?category=Networking"
-         class="filter-pill {% if selected_category == 'Networking' %}active{% endif %}">
-        <i class="bi bi-wifi me-1"></i>Networking
-      </a>
-      <a href="/jobs?category=OS / Linux"
-         class="filter-pill {% if selected_category == 'OS / Linux' %}active{% endif %}">
-        <i class="bi bi-laptop me-1"></i>OS / Linux
-      </a>
-      <a href="/jobs?category=Programming"
-         class="filter-pill {% if selected_category == 'Programming' %}active{% endif %}">
-        <i class="bi bi-code-slash me-1"></i>Programming
-      </a>
-      <a href="/jobs?category=Hardware"
-         class="filter-pill {% if selected_category == 'Hardware' %}active{% endif %}">
-        <i class="bi bi-cpu me-1"></i>Hardware
-      </a>
-      <a href="/jobs?category=Software"
-         class="filter-pill {% if selected_category == 'Software' %}active{% endif %}">
-        <i class="bi bi-app me-1"></i>Software
-      </a>
-      <a href="/jobs?category=Other"
-         class="filter-pill {% if selected_category == 'Other' %}active{% endif %}">
-        Other
-      </a>
-    </div>
-
-    <!-- Jobs grid -->
-    {% if jobs %}
-      <div class="row g-4">
-        {% for job in jobs %}
-          <div class="col-md-6 col-lg-4">
-            <!--
-              Each card is a link to /job/<id>
-              job["id"], job["title"] etc. come from the database query in app.py
-            -->
-            <a href="/job/{{ job['id'] }}" class="job-card">
-
-              <span class="cat-badge">{{ job['category'] }}</span>
-
-              <h5>{{ job['title'] }}</h5>
-
-              <!-- Show first 100 characters of description as a preview -->
-              <p>{{ job['description'][:100] }}{% if job['description']|length > 100 %}...{% endif %}</p>
-
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="budget-tag">
-                  <i class="bi bi-cash me-1"></i>K{{ "%.0f"|format(job['budget']) }}
-                </span>
-                <span class="poster-info">
-                  <i class="bi bi-person me-1"></i>{{ job['poster_name'] }}
-                </span>
-              </div>
-
-              <div class="mt-2 poster-info">
-                <i class="bi bi-clock me-1"></i>
-                {{ job['created_at'][:10] }}  <!-- shows just the date e.g. 2026-03-09 -->
-              </div>
-
-            </a>
-          </div>
+    <!-- University Dropdown Filter -->
+    <div class="dropdown ms-auto">
+      <button class="btn btn-outline-secondary dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown"
+        style="font-size: .85rem; font-weight: 600;">
+        <i class="bi bi-building me-1"></i>
+        {% if selected_university %}{{ selected_university }}{% else %}Filter by University{% endif %}
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size: .85rem;">
+        <li><a class="dropdown-item {% if not selected_university %}active{% endif %}"
+            href="/jobs{% if selected_category %}?category={{ selected_category|urlencode }}{% endif %}">All
+            Universities</a></li>
+        {% for uni in universities %}
+        <li><a class="dropdown-item {% if selected_university == uni %}active{% endif %}"
+            href="/jobs?university={{ uni|urlencode }}{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}">{{
+            uni }}</a></li>
         {% endfor %}
-      </div>
-
-    {% else %}
-      <!-- Shown when there are no jobs yet (or none match the filter) -->
-      <div class="empty-state">
-        <div class="icon">🔍</div>
-        <h5 class="fw-bold text-dark">No jobs found</h5>
-        <p>
-          {% if selected_category %}
-            No jobs in the <strong>{{ selected_category }}</strong> category yet.
-            <a href="/jobs">View all jobs</a>
-          {% else %}
-            No jobs posted yet. Be the first!
-          {% endif %}
-        </p>
-        <a href="/post-job" class="btn btn-primary px-4 mt-2">Post a Job</a>
-      </div>
-    {% endif %}
-
+      </ul>
+    </div>
   </div>
 
-  <!-- Footer -->
-  <footer class="text-center py-4 bg-dark text-secondary">
-    <small>CampusFix &copy; 2026 – Student Tech Marketplace</small>
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+  <!-- Jobs grid -->
+  {% if jobs %}
+  <div class="row g-4">
+    {% for job in jobs %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card p-4 h-100">
+        <span class="badge-cat mb-2 d-inline-block align-self-start">
+          <i class="bi bi-tag me-1"></i>{{ job.category }}
+        </span>
+        <h5 class="fw-bold">{{ job.title }}</h5>
+        <div class="mb-2 text-muted small">
+          University: {{ job.poster_university }}
+        </div>
+        <p class="text-muted small mb-3">
+          {{ job.description[:100] }}{% if job.description|length > 100 %}...{% endif %}
+        </p>
+        <div class="d-flex justify-content-between align-items-center mt-auto">
+          <span class="budget">
+            <i class="bi bi-cash me-1"></i>K{{ "%.0f"|format(job.budget) }}
+          </span>
+          <a href="/job/{{ job.id }}" class="btn btn-primary btn-sm">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">🔍</div>
+    <h5 class="fw-bold text-dark">No jobs found</h5>
+    <p>
+      {% if selected_category %}
+      No jobs in the <strong>{{ selected_category }}</strong> category yet.
+      <a href="/jobs">View all jobs</a>
+      {% else %}
+      No jobs posted yet. Be the first!
+      {% endif %}
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
