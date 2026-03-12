@@ -1,123 +1,111 @@
-<!-- ============================================================
-     templates/base.html
-     Shared layout that all other pages extend.
-     ============================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CampusFix – {% block title %}{% endblock %}</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusFix - {% block title %}{% endblock %}</title>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
   <style>
+    :root {
+      --cf-blue: #0d6efd;
+      --cf-dark: #0f172a;
+    }
+
     body {
-      background: #f0f4ff;
-      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8fafc;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: var(--cf-dark);
     }
 
-    /* Navbar */
-    .navbar-brand {
-      font-weight: 800;
-      font-size: 1.4rem;
-      color: #0d6efd !important;
+    .navbar {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .navbar-brand span {
-      color: #f59e0b;
+    .nav-link {
+      font-weight: 500;
     }
 
-    /* Auth card */
-    .auth-card {
-      max-width: 440px;
-      margin: 60px auto;
-      background: #fff;
-      border-radius: 16px;
-      padding: 2.5rem;
-      box-shadow: 0 8px 32px rgba(13, 110, 253, 0.10);
+    .badge-nav {
+      font-size: 0.65rem;
+      padding: 0.25em 0.4em;
     }
 
-    .auth-card h2 {
-      font-weight: 800;
-      color: #0f1117;
-    }
-
-    .auth-card .subtitle {
-      color: #6b7280;
-      font-size: .95rem;
+    .card {
+      border: none;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
     }
 
     .btn-primary {
-      background: #0d6efd;
-      border: none;
+      border-radius: 8px;
       font-weight: 600;
-      padding: .65rem;
-    }
-
-    .btn-primary:hover {
-      background: #1a3fce;
-    }
-
-    /* Dashboard */
-    .dashboard-card {
-      max-width: 500px;
-      margin: 80px auto;
-      background: #fff;
-      border-radius: 16px;
-      padding: 2.5rem;
-      box-shadow: 0 8px 32px rgba(13, 110, 253, 0.10);
-      text-align: center;
+      padding: 0.6rem 1.25rem;
     }
   </style>
 </head>
 
 <body>
-
   <!-- Navbar -->
-  <nav class="navbar navbar-light bg-white border-bottom">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
     <div class="container">
-      <a class="navbar-brand" href="/">Campus<span>Fix</span></a>
-      <span class="text-muted small">Student Tech Marketplace</span>
-    </div>
-  </nav>
-
-  <!-- True Application Navbar (with features) -->
-  <nav class="navbar navbar-expand-lg bg-light border-bottom sticky-top mb-4">
-    <div class="container d-flex justify-content-between">
-      <ul class="navbar-nav d-flex flex-row gap-3">
-        <li class="nav-item">
-          <a class="nav-link fw-semibold text-dark" href="/"><i class="bi bi-house me-1"></i> Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link fw-semibold text-dark" href="/jobs"><i class="bi bi-search me-1"></i> Browse Jobs</a>
-        </li>
-        {% if session.get('user_id') %}
-        <li class="nav-item">
-          <a class="nav-link fw-semibold text-primary" href="/dashboard"><i class="bi bi-layout-text-window me-1"></i>
-            Dashboard</a>
-        </li>
-        {% endif %}
-      </ul>
-
-      <div class="d-flex gap-2">
-        {% if session.get('user_id') %}
-        <a href="/settings" class="btn btn-light btn-sm px-3"><i class="bi bi-gear me-1"></i>Settings</a>
-        <a href="/post-job" class="btn btn-primary btn-sm px-3"><i class="bi bi-plus-circle me-1"></i>Post Problem</a>
-        <a href="/logout" class="btn btn-outline-danger btn-sm px-3">Logout</a>
-        {% else %}
-        <a href="/login" class="btn btn-outline-primary btn-sm px-3">Login</a>
-        <a href="/register" class="btn btn-primary btn-sm px-3">Register</a>
-        {% endif %}
+      <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">CampusFix</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('jobs_list') }}">Browse Jobs</a></li>
+          {% if session.get('user_id') %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('messages') }}">
+              Messages
+              {% if unread_messages > 0 %}
+              <span class="badge bg-danger rounded-pill badge-nav">{{ unread_messages }}</span>
+              {% endif %}
+            </a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('notifications') }}">
+              Notifications
+              {% if unread_notifications > 0 %}
+              <span class="badge bg-warning text-dark rounded-pill badge-nav">{{ unread_notifications }}</span>
+              {% endif %}
+            </a></li>
+          {% endif %}
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          {% if session.get('user_id') %}
+          {% if session.get('role') == 'admin' %}
+          <a href="{{ url_for('admin_panel') }}" class="btn btn-warning btn-sm fw-bold">Admin</a>
+          {% endif %}
+          <a href="{{ url_for('post_job') }}" class="btn btn-light text-primary btn-sm fw-bold">Post Problem</a>
+          <div class="dropdown">
+            <button class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+              {{ session['user_name'] }}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{{ url_for('profile', user_id=session['user_id']) }}">My Profile</a>
+              </li>
+              <li><a class="dropdown-item" href="{{ url_for('settings') }}">Settings</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+          </div>
+          {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">Login</a>
+          <a href="{{ url_for('register') }}" class="btn btn-light btn-sm">Register</a>
+          {% endif %}
+        </div>
       </div>
     </div>
   </nav>
 
-  <!-- Flash messages (success / error alerts) -->
+  <!-- Flash Messages -->
   <div class="container mt-3">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -131,11 +119,19 @@
     {% endwith %}
   </div>
 
-  <!-- Page content goes here -->
-  {% block content %}{% endblock %}
+  <!-- Main Content -->
+  <main class="py-4">
+    {% block content %}{% endblock %}
+  </main>
 
-  <!-- Bootstrap 5 JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <footer class="bg-white border-top py-4 mt-5">
+    <div class="container text-center text-muted">
+      <p class="small mb-0">&copy; 2026 CampusFix Zambia. Connecting university students through tech.</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="fw-bold mb-4 text-warning"><i class="bi bi-shield-lock-fill me-2"></i>Admin Dashboard</h2>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white p-4">
+                <h1 class="fw-bold mb-1">{{ counts.u }}</h1>
+                <p class="mb-0 text-white-50">Total Registered Users</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white p-4">
+                <h1 class="fw-bold mb-1">{{ counts.j }}</h1>
+                <p class="mb-0 text-white-50">Total Problems Posted</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white p-4">
+                <h1 class="fw-bold mb-1">{{ counts.r }}</h1>
+                <p class="mb-0 text-white-50">Pending Reports</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div class="card">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">Pending Support Reports</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Reporter</th>
+                            <th>Reason</th>
+                            <th>Target</th>
+                            <th>Date</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if reports %}
+                        {% for r in reports %}
+                        <tr>
+                            <td class="fw-bold">{{ r.reporter }}</td>
+                            <td>{{ r.reason }}</td>
+                            <td>
+                                {% if r.job_id %}
+                                <span class="badge bg-secondary-subtle text-secondary">Job #{{ r.job_id }}</span>
+                                {% else %}
+                                <span class="badge bg-info-subtle text-info">User #{{ r.reported_user_id }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ r.created_at.strftime('%d %b') }}</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-success">Resolve</button>
+                                <button class="btn btn-sm btn-danger"><i class="bi bi-hammer"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">No pending reports. All clear!</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

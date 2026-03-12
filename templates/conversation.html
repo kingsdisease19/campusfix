@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Chat with {{ other_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-0 py-lg-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg chat-card d-flex flex-column"
+                style="height: calc(100vh - 160px); min-height: 500px;">
+                <!-- Header -->
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                    <a href="{{ url_for('messages') }}" class="btn btn-link text-decoration-none text-muted p-0 me-3">
+                        <i class="bi bi-chevron-left fs-4"></i>
+                    </a>
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-2"
+                        style="width: 40px; height: 40px;">
+                        {{ other_name[:1] }}
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 lh-1">{{ other_name }}</h6>
+                        <small class="text-success" style="font-size: 0.7rem;"><i class="bi bi-circle-fill me-1"
+                                style="font-size: 0.5rem;"></i>Active discussion</small>
+                    </div>
+                </div>
+
+                <!-- Messages area -->
+                <div class="card-body overflow-auto p-4 flex-grow-1" id="chatWindow" style="background-color: #f1f5f9;">
+                    {% if thread %}
+                    {% for msg in thread %}
+                    <div class="d-flex mb-4 {% if msg.sender_id == session['user_id'] %}justify-content-end{% endif %}">
+                        <div class="max-w-75 p-3 rounded-4 shadow-sm {% if msg.sender_id == session['user_id'] %}bg-primary text-white rounded-bottom-end-0{% else %}bg-white text-dark rounded-bottom-start-0{% endif %}"
+                            style="max-width: 80%;">
+                            {% if msg.job_title %}
+                            <div class="mb-1 border-bottom pb-1 small {% if msg.sender_id == session['user_id'] %}border-white-50{% else %}border-light{% endif %}"
+                                style="font-size: 0.7rem;">
+                                Re: {{ msg.job_title }}
+                            </div>
+                            {% endif %}
+                            <p class="mb-1" style="font-size: 0.95rem;">{{ msg.body }}</p>
+                            <div class="text-end" style="font-size: 0.65rem; opacity: 0.8;">
+                                {{ msg.created_at.strftime('%H:%M') }}
+                                {% if msg.sender_id == session['user_id'] %}
+                                <i class="bi bi-check2{{ '-all text-info' if msg.is_read else '' }} ms-1"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                        <i class="bi bi-chat-square-text fs-1 opacity-25"></i>
+                        <p class="mt-2">Start the conversation</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Input area -->
+                <div class="card-footer bg-white border-top p-3">
+                    <form action="{{ url_for('send_msg') }}" method="POST" class="d-flex gap-2">
+                        <input type="hidden" name="receiver_id" value="{{ other_id }}">
+                        <input type="text" name="body" class="form-control rounded-pill border-light bg-light"
+                            placeholder="Type a message..." required autocomplete="off">
+                        <button type="submit"
+                            class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 45px; height: 45px;">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function () {
+        var chatWindow = document.getElementById('chatWindow');
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    };
+</script>
+{% endblock %}

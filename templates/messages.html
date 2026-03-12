@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0">Your Conversations</h2>
+            </div>
+
+            <div class="card overflow-hidden">
+                <div class="list-group list-group-flush">
+                    {% if convs %}
+                    {% for c in convs %}
+                    <a href="{{ url_for('conversation', other_user_id=c.other_id) }}"
+                        class="list-group-item list-group-item-action py-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold me-3"
+                                style="width: 55px; height: 55px; flex-shrink: 0;">
+                                {{ c.other_name[:2].upper() }}
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="d-flex w-100 justify-content-between mb-1">
+                                    <h6 class="fw-bold mb-0">{{ c.other_name }}</h6>
+                                    <small class="text-muted">{{ c.created_at.strftime('%H:%M' if c.created_at.date() ==
+                                        now.date() else '%d %b') }}</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <p class="text-muted small text-truncate mb-0 pe-4">
+                                        {% if not c.is_read and c.receiver_id == session['user_id'] %}<span
+                                            class="badge bg-danger p-1 rounded-pill me-1">&nbsp;</span>{% endif %}
+                                        {{ c.last_msg }}
+                                    </p>
+                                    {% if not c.is_read and c.receiver_id == session['user_id'] %}
+                                    <span class="badge bg-primary rounded-pill">New</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% else %}
+                    <div class="p-5 text-center">
+                        <i class="bi bi-chat-left-dots display-1 text-muted opacity-25"></i>
+                        <h4 class="mt-3 fw-bold">No messages yet</h4>
+                        <p class="text-muted">Reach out to a student to start chatting!</p>
+                        <a href="{{ url_for('jobs_list') }}" class="btn btn-primary px-4">Find a Job</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

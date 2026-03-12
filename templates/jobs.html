@@ -1,169 +1,117 @@
 {% extends "base.html" %}
 
-{% block title %}Browse Jobs{% endblock %}
+{% block title %}Browse Marketplace{% endblock %}
 
 {% block content %}
-<style>
-  /* Page header */
-  .page-header {
-    background: linear-gradient(135deg, #0d6efd 0%, #1a3fce 100%);
-    color: #fff;
-    padding: 50px 0 40px;
-  }
-
-  .page-header h1 {
-    font-weight: 800;
-  }
-
-  /* Filter pills */
-  .filter-pill {
-    border: 2px solid #dee2e6;
-    border-radius: 30px;
-    padding: .35rem 1rem;
-    font-size: .82rem;
-    font-weight: 600;
-    color: #6b7280;
-    text-decoration: none;
-    transition: all .15s;
-    background: #fff;
-    display: inline-block;
-  }
-
-  .filter-pill:hover,
-  .filter-pill.active {
-    border-color: #0d6efd;
-    background: #e8eeff;
-    color: #0d6efd;
-  }
-
-  /* Cards */
-  .card {
-    border: none;
-    border-radius: 14px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, .07);
-  }
-
-  .badge-cat {
-    background: #e8eeff;
-    color: #0d6efd;
-    font-size: .75rem;
-    font-weight: 600;
-    border-radius: 20px;
-    padding: .25rem .75rem;
-  }
-
-  .budget {
-    background: #dcfce7;
-    color: #16a34a;
-    font-size: .8rem;
-    font-weight: 600;
-    border-radius: 6px;
-    padding: .2rem .6rem;
-  }
-
-  /* Empty state */
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #9ca3af;
-  }
-
-  .empty-state .icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-</style>
-
-<!-- Page header -->
-<div class="page-header">
-  <div class="container d-flex justify-content-between align-items-center">
-    <div>
-      <h1>Browse Tech Jobs</h1>
-      <p class="mb-0" style="opacity:.85;">Pick a problem you can fix and help a fellow student</p>
-    </div>
-    <div>
-      <a href="/post-job" class="btn btn-light fw-bold">Post a Job</a>
-    </div>
-  </div>
-</div>
-
-<div class="container py-5">
-  <!-- Category filters -->
-  <div class="d-flex flex-wrap gap-2 mb-4">
-    <a href="/jobs{% if selected_university %}?university={{ selected_university|urlencode }}{% endif %}"
-      class="filter-pill {% if not selected_category %}active{% endif %}">All Jobs</a>
-    <a href="/jobs?category=Networking{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
-      class="filter-pill {% if selected_category == 'Networking' %}active{% endif %}">Networking</a>
-    <a href="/jobs?category=OS / Linux{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
-      class="filter-pill {% if selected_category == 'OS / Linux' %}active{% endif %}">OS / Linux</a>
-    <a href="/jobs?category=Programming{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
-      class="filter-pill {% if selected_category == 'Programming' %}active{% endif %}">Programming</a>
-    <a href="/jobs?category=Hardware{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
-      class="filter-pill {% if selected_category == 'Hardware' %}active{% endif %}">Hardware</a>
-    <a href="/jobs?category=Software{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
-      class="filter-pill {% if selected_category == 'Software' %}active{% endif %}">Software</a>
-    <a href="/jobs?category=Other{% if selected_university %}&university={{ selected_university|urlencode }}{% endif %}"
-      class="filter-pill {% if selected_category == 'Other' %}active{% endif %}">Other</a>
-
-    <!-- University Dropdown Filter -->
-    <div class="dropdown ms-auto">
-      <button class="btn btn-outline-secondary dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown"
-        style="font-size: .85rem; font-weight: 600;">
-        <i class="bi bi-building me-1"></i>
-        {% if selected_university %}{{ selected_university }}{% else %}Filter by University{% endif %}
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size: .85rem;">
-        <li><a class="dropdown-item {% if not selected_university %}active{% endif %}"
-            href="/jobs{% if selected_category %}?category={{ selected_category|urlencode }}{% endif %}">All
-            Universities</a></li>
-        {% for uni in universities %}
-        <li><a class="dropdown-item {% if selected_university == uni %}active{% endif %}"
-            href="/jobs?university={{ uni|urlencode }}{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}">{{
-            uni }}</a></li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-
-  <!-- Jobs grid -->
-  {% if jobs %}
+<div class="container">
   <div class="row g-4">
-    {% for job in jobs %}
-    <div class="col-md-6 col-lg-4">
-      <div class="card p-4 h-100">
-        <span class="badge-cat mb-2 d-inline-block align-self-start">
-          <i class="bi bi-tag me-1"></i>{{ job.category }}
-        </span>
-        <h5 class="fw-bold">{{ job.title }}</h5>
-        <div class="mb-2 text-muted small">
-          University: {{ job.poster_university }}
-        </div>
-        <p class="text-muted small mb-3">
-          {{ job.description[:100] }}{% if job.description|length > 100 %}...{% endif %}
-        </p>
-        <div class="d-flex justify-content-between align-items-center mt-auto">
-          <span class="budget">
-            <i class="bi bi-cash me-1"></i>K{{ "%.0f"|format(job.budget|float) }}
-          </span>
-          <a href="/job/{{ job.id }}" class="btn btn-primary btn-sm">View Details</a>
+    <!-- Filters Sidebar -->
+    <div class="col-lg-3">
+      <div class="card sticky-top" style="top: 85px;">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Filters</h5>
+          <form action="{{ url_for('jobs_list') }}" method="GET">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">University</label>
+              <select name="university" class="form-select form-select-sm">
+                <option value="">All Universities</option>
+                {% for uni in universities %}
+                <option value="{{ uni }}" {% if filters.uni==uni %}selected{% endif %}>{{ uni }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Category</label>
+              <select name="category" class="form-select form-select-sm">
+                <option value="">All Categories</option>
+                <option {% if filters.cat=='Laptop Repair' %}selected{% endif %}>Laptop Repair</option>
+                <option {% if filters.cat=='Phone Repair' %}selected{% endif %}>Phone Repair</option>
+                <option {% if filters.cat=='WiFi and Networking' %}selected{% endif %}>WiFi and Networking</option>
+                <option {% if filters.cat=='Programming Help' %}selected{% endif %}>Programming Help</option>
+                <option {% if filters.cat=='Assignment Help' %}selected{% endif %}>Assignment Help</option>
+                <option {% if filters.cat=='Software Installation' %}selected{% endif %}>Software Installation</option>
+                <option {% if filters.cat=='Hardware Repair' %}selected{% endif %}>Hardware Repair</option>
+                <option {% if filters.cat=='Graphic Design' %}selected{% endif %}>Graphic Design</option>
+                <option {% if filters.cat=='Data Recovery' %}selected{% endif %}>Data Recovery</option>
+                <option {% if filters.cat=='Other' %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-bold">Budget Range</label>
+              <div class="input-group input-group-sm mb-2">
+                <span class="input-group-text">K</span>
+                <input type="number" name="min_budget" class="form-control" placeholder="Min" value="{{ filters.min }}">
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">K</span>
+                <input type="number" name="max_budget" class="form-control" placeholder="Max" value="{{ filters.max }}">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 btn-sm">Apply Filters</button>
+            <a href="{{ url_for('jobs_list') }}" class="btn btn-link w-100 btn-sm mt-1 text-decoration-none">Clear
+              All</a>
+          </form>
         </div>
       </div>
     </div>
-    {% endfor %}
+
+    <!-- Jobs Grid -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0">Available Problems</h4>
+        <p class="text-muted small mb-0">Showing {{ count }} results</p>
+      </div>
+
+      <div class="row g-4">
+        {% if jobs %}
+        {% for job in jobs %}
+        <div class="col-md-6">
+          <div class="card h-100 {% if job.is_featured %}border-warning border-2{% endif %}">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-light-subtle text-primary border border-primary-subtle">
+                  {{ job.category }}
+                </span>
+                {% if job.is_featured %}
+                <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>Featured</span>
+                {% endif %}
+              </div>
+              <h5 class="card-title fw-bold">{{ job.title }}</h5>
+              <p class="card-text text-muted small flex-grow-1">{{ job.description[:120] }}...</p>
+
+              <div class="mt-3 bg-light rounded p-2 d-flex justify-content-between align-items-center">
+                <div>
+                  <span class="d-block fw-bold text-primary mb-0">K{{ job.budget }}</span>
+                  <small class="text-muted" style="font-size: 0.7rem;">
+                    <i class="bi bi-eye"></i> {{ job.views }} •
+                    <i class="bi bi-chat"></i> {{ job.offer_count }} offers
+                  </small>
+                </div>
+                <a href="{{ url_for('job_details', job_id=job.id) }}" class="btn btn-primary btn-sm px-3">View</a>
+              </div>
+
+              <div class="mt-2 border-top pt-2 d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ job.university }}</small>
+                {% if job.deadline %}
+                <small class="text-danger small fw-bold">Due: {{ job.deadline.strftime('%d %b') }}</small>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="col-12 text-center py-5">
+          <i class="bi bi-search display-1 text-muted opacity-25"></i>
+          <p class="mt-3 text-muted">No problems match your current filters.</p>
+          <a href="{{ url_for('jobs_list') }}" class="btn btn-sm btn-outline-primary">Clear Filters</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
-  {% else %}
-  <div class="empty-state">
-    <div class="icon">🔍</div>
-    <h5 class="fw-bold text-dark">No jobs found</h5>
-    <p>
-      {% if selected_category %}
-      No jobs in the <strong>{{ selected_category }}</strong> category yet.
-      <a href="/jobs">View all jobs</a>
-      {% else %}
-      No jobs posted yet. Be the first!
-      {% endif %}
-    </p>
-  </div>
-  {% endif %}
 </div>
 {% endblock %}

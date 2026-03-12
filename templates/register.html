@@ -1,88 +1,78 @@
-<!-- ============================================================
-     templates/register.html
-     User registration page
-     ============================================================ -->
 {% extends "base.html" %}
-{% block title %}Register{% endblock %}
+
+{% block title %}Join CampusFix{% endblock %}
 
 {% block content %}
-<div class="auth-card">
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card p-4">
+        <div class="text-center mb-4">
+          <h2 class="fw-bold">Create Account</h2>
+          <p class="text-muted">Join the Zambian student marketplace</p>
+        </div>
 
-  <!-- Header -->
-  <div class="text-center mb-4">
-    <div class="mb-2" style="font-size:2.5rem;">🎓</div>
-    <h2>Create Account</h2>
-    <p class="subtitle">Join CampusFix and start getting tech help on campus</p>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Full Name</label>
+            <input type="text" name="name" class="form-control px-3 py-2" placeholder="John Doe" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Email Address</label>
+            <input type="email" name="email" class="form-control px-3 py-2" placeholder="student@example.com" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Phone Number</label>
+            <input type="tel" name="phone" class="form-control px-3 py-2" placeholder="097..." required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">University</label>
+            <select name="university" class="form-select px-3 py-2" required>
+              <option value="">Select your university</option>
+              <option>University of Zambia (UNZA)</option>
+              <option>Copperbelt University (CBU)</option>
+              <option>Mulungushi University</option>
+              <option>Kwame Nkrumah University</option>
+              <option>Chalimbana University</option>
+              <option>Mukuba University</option>
+              <option>NIPA</option>
+              <option>Evelyn Hone College</option>
+              <option>ZCAS University</option>
+              <option>Cavendish University Zambia</option>
+              <option>Texila American University</option>
+              <option>DMI St Eugene University</option>
+              <option>Lusaka Apex Medical University</option>
+              <option>Levy Mwanawasa Medical University</option>
+              <option>Rockview University</option>
+              <option>Northrise University</option>
+              <option>Rusangu University</option>
+              <option>Zambia Catholic University</option>
+              <option>Livingstone International University</option>
+              <option>Zambia Institute of Mass Communication</option>
+              <option>Natural Resources Development College</option>
+              <option>Zambia Air Services Training Institute</option>
+              <option>Northern Technical College (NORTEC)</option>
+              <option>Lusaka Business and Technical College</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Password</label>
+            <input type="password" name="password" class="form-control px-3 py-2" placeholder="Min 6 characters"
+              required minlength="6">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-2">Create Account</button>
+
+          <div class="text-center mt-3">
+            <small class="text-muted">Already have an account? <a href="{{ url_for('login') }}">Login</a></small>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-
-  <!-- Registration Form -->
-  <!--
-    method="POST"  → sends data to the /register route
-    action=""      → submits to the same URL (/register)
-  -->
-  <form method="POST" action="/register">
-
-    <!-- Full Name -->
-    <div class="mb-3">
-      <label for="name" class="form-label fw-semibold">Full Name</label>
-      <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Chanda Mwansa" required />
-    </div>
-
-    <!-- Email -->
-    <div class="mb-3">
-      <label for="email" class="form-label fw-semibold">Email Address</label>
-      <input type="email" id="email" name="email" class="form-control" placeholder="e.g. chanda@student.unza.zm"
-        required />
-    </div>
-
-    <!-- University -->
-    <div class="mb-3">
-      <label for="university" class="form-label fw-semibold">University or College</label>
-      <select id="university" name="university" class="form-select" required>
-        <option value="" disabled selected>Select your institution...</option>
-        <option value="University of Zambia (UNZA)">University of Zambia (UNZA)</option>
-        <option value="Copperbelt University">Copperbelt University</option>
-        <option value="Mulungushi University">Mulungushi University</option>
-        <option value="Kwame Nkrumah University">Kwame Nkrumah University</option>
-        <option value="Chalimbana University">Chalimbana University</option>
-        <option value="Mukuba University">Mukuba University</option>
-        <option value="NIPA">NIPA</option>
-        <option value="Evelyn Hone College">Evelyn Hone College</option>
-        <option value="ZCAS University">ZCAS University</option>
-        <option value="Cavendish University Zambia">Cavendish University Zambia</option>
-        <option value="Texila American University">Texila American University</option>
-        <option value="DMI St Eugene University">DMI St Eugene University</option>
-        <option value="Lusaka Apex Medical University">Lusaka Apex Medical University</option>
-        <option value="Levy Mwanawasa Medical University">Levy Mwanawasa Medical University</option>
-        <option value="Rockview University">Rockview University</option>
-        <option value="Northrise University">Northrise University</option>
-        <option value="Rusangu University">Rusangu University</option>
-        <option value="Zambia Catholic University">Zambia Catholic University</option>
-        <option value="Livingstone International University">Livingstone International University</option>
-      </select>
-    </div>
-
-    <!-- Password -->
-    <div class="mb-4">
-      <label for="password" class="form-label fw-semibold">Password</label>
-      <input type="password" id="password" name="password" class="form-control" placeholder="At least 6 characters"
-        required />
-      <div class="form-text">Your password will be stored securely.</div>
-    </div>
-
-    <!-- Submit button -->
-    <button type="submit" class="btn btn-primary w-100 rounded-3">
-      <i class="bi bi-person-plus me-2"></i>Create My Account
-    </button>
-
-  </form>
-
-  <!-- Link to login page -->
-  <hr class="my-4" />
-  <p class="text-center text-muted mb-0" style="font-size:.9rem;">
-    Already have an account?
-    <a href="/login" class="text-decoration-none fw-semibold">Log in here</a>
-  </p>
-
 </div>
 {% endblock %}

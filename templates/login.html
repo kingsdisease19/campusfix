@@ -1,62 +1,49 @@
-<!-- ============================================================
-     templates/login.html
-     User login page
-     ============================================================ -->
 {% extends "base.html" %}
+
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="auth-card">
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+      <div class="card p-4">
+        <div class="text-center mb-4">
+          <h2 class="fw-bold">Login</h2>
+          <p class="text-muted">Enter your credentials to continue</p>
+        </div>
 
-  <!-- Header -->
-  <div class="text-center mb-4">
-    <div class="mb-2" style="font-size:2.5rem;">🔑</div>
-    <h2>Welcome Back</h2>
-    <p class="subtitle">Log in to your CampusFix account</p>
+        {% if locked %}
+        <div class="alert alert-danger text-center">
+          <i class="bi bi-lock-fill me-2"></i> Account Locked
+        </div>
+        {% endif %}
+
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Email Address</label>
+            <input type="email" name="email" class="form-control px-3 py-2" placeholder="name@example.com" required {%
+              if locked %}disabled{% endif %}>
+          </div>
+
+          <div class="mb-4">
+            <div class="d-flex justify-content-between">
+              <label class="form-label fw-bold">Password</label>
+              <a href="#" class="small text-decoration-none">Forgot?</a>
+            </div>
+            <input type="password" name="password" class="form-control px-3 py-2" placeholder="Enter password" required
+              {% if locked %}disabled{% endif %}>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-2" {% if locked %}disabled{% endif %}>
+            Login to CampusFix
+          </button>
+
+          <div class="text-center mt-3">
+            <small class="text-muted">New student? <a href="{{ url_for('register') }}">Create Account</a></small>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-
-  <!-- Login Form -->
-  <form method="POST" action="/login">
-
-    <!-- Email -->
-    <div class="mb-3">
-      <label for="email" class="form-label fw-semibold">Email Address</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        class="form-control"
-        placeholder="Enter your email"
-        required
-      />
-    </div>
-
-    <!-- Password -->
-    <div class="mb-4">
-      <label for="password" class="form-label fw-semibold">Password</label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        class="form-control"
-        placeholder="Enter your password"
-        required
-      />
-    </div>
-
-    <!-- Submit button -->
-    <button type="submit" class="btn btn-primary w-100 rounded-3">
-      <i class="bi bi-box-arrow-in-right me-2"></i>Log In
-    </button>
-
-  </form>
-
-  <!-- Link to register page -->
-  <hr class="my-4"/>
-  <p class="text-center text-muted mb-0" style="font-size:.9rem;">
-    Don't have an account?
-    <a href="/register" class="text-decoration-none fw-semibold">Register here</a>
-  </p>
-
 </div>
 {% endblock %}

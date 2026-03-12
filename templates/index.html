@@ -1,114 +1,104 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Student Tech Help Marketplace{% endblock %}
 
 {% block content %}
-<style>
-  /* Hero */
-  .hero {
-    background: linear-gradient(135deg, #0d6efd 0%, #1a3fce 100%);
-    color: #fff;
-    padding: 80px 0 70px;
-  }
+<!-- Hero Section -->
+<div class="bg-primary text-white py-5 mb-5 rounded-bottom-5">
+  <div class="container text-center py-4">
+    <h1 class="display-4 fw-bold mb-3">Fix Your Campus Life</h1>
+    <p class="lead mb-4">The tech marketplace for Zambian university students. Get help or earn money fixing tech.</p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{{ url_for('jobs_list') }}" class="btn btn-light btn-lg text-primary fw-bold">Find a Job</a>
+      <a href="{{ url_for('post_job') }}" class="btn btn-outline-light btn-lg fw-bold">Post a Problem</a>
+    </div>
 
-  .hero h1 {
-    font-weight: 800;
-    font-size: 2.4rem;
-  }
-
-  .hero p {
-    opacity: .88;
-    font-size: 1.05rem;
-  }
-
-  /* Cards */
-  .card {
-    border: none;
-    border-radius: 14px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, .07);
-  }
-
-  .badge-cat {
-    background: #e8eeff;
-    color: #0d6efd;
-    font-size: .75rem;
-    font-weight: 600;
-    border-radius: 20px;
-    padding: .25rem .75rem;
-  }
-
-  .budget {
-    background: #dcfce7;
-    color: #16a34a;
-    font-size: .8rem;
-    font-weight: 600;
-    border-radius: 6px;
-    padding: .2rem .6rem;
-  }
-
-  /* Welcome banner */
-  .welcome-bar {
-    background: #0d6efd;
-    color: #fff;
-    padding: .8rem 0;
-    font-size: .95rem;
-  }
-</style>
-
-{% if name %}
-<div class="welcome-bar text-center">
-  <i class="bi bi-check-circle-fill me-2"></i>
-  You are logged in as <strong>{{ name }}</strong> —
-  <a href="/logout" class="text-white fw-semibold">Logout</a>
-</div>
-{% endif %}
-
-<section class="hero">
-  <div class="container text-center">
-    <h1 class="mb-3">Get Help With Tech Problems<br>On Campus</h1>
-    <p class="mb-5">
-      Post your tech issue and let fellow students solve it — fast, affordable, and right on campus.
-    </p>
-    <div class="d-flex justify-content-center gap-3 flex-wrap">
-      <a href="/post-job" class="btn btn-light fw-semibold px-4">
-        <i class="bi bi-plus-circle me-2"></i>Post a Problem
-      </a>
-      <a href="/jobs" class="btn btn-outline-light fw-semibold px-4">
-        <i class="bi bi-search me-2"></i>Browse Jobs
-      </a>
+    <div class="row mt-5 pt-4">
+      <div class="col-4">
+        <h3 class="fw-bold mb-0">{{ stats.users }}</h3>
+        <small class="text-white-50">Students</small>
+      </div>
+      <div class="col-4 border-start border-end border-white-50">
+        <h3 class="fw-bold mb-0">{{ stats.jobs }}</h3>
+        <small class="text-white-50">Problems Fixed</small>
+      </div>
+      <div class="col-4">
+        <h3 class="fw-bold mb-0">{{ stats.unis }}</h3>
+        <small class="text-white-50">Universities</small>
+      </div>
     </div>
   </div>
-</section>
+</div>
 
-<section class="py-5 bg-white" id="jobs">
-  <div class="container">
-    <h2 class="fw-bold mb-4">Latest Problems</h2>
+<div class="container">
+  <!-- Featured Jobs -->
+  {% if featured %}
+  <div class="mb-5">
+    <div class="d-flex align-items-center mb-4">
+      <h2 class="h4 fw-bold mb-0">Featured Problems</h2>
+      <span class="badge bg-warning text-dark ms-2">Highlighted</span>
+    </div>
     <div class="row g-4">
-      {% for job in jobs %}
-      <div class="col-md-6 col-lg-4">
-        <div class="card p-4 h-100">
-          <span class="badge-cat mb-2 d-inline-block align-self-start">
-            <i class="bi bi-tag me-1"></i>{{ job.category }}
-          </span>
-          <h6 class="fw-bold">{{ job.title }}</h6>
-          <div class="mb-2 text-muted small">
-            University: {{ job.poster_university }}
-          </div>
-          <p class="text-muted small">
-            {{ job.description[:100] }}{% if job.description|length > 100 %}...{% endif %}
-          </p>
-          <div class="d-flex justify-content-between align-items-center mt-auto">
-            <span class="budget">Budget: K{{ "%.0f"|format(job.budget|float) }}</span>
-            <a href="/job/{{ job.id }}" class="btn btn-outline-primary btn-sm">View Details</a>
+      {% for job in featured %}
+      <div class="col-md-4">
+        <div class="card h-100 border-warning border-2">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge bg-light text-primary">{{ job.category }}</span>
+              <span class="fw-bold text-success">K{{ job.budget }}</span>
+            </div>
+            <h5 class="card-title fw-bold">{{ job.title }}</h5>
+            <p class="card-text text-muted small mb-3">{{ job.description[:100] }}...</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ job.created_at.strftime('%d %b') }}</small>
+              <a href="{{ url_for('job_details', job_id=job.id) }}" class="btn btn-primary btn-sm">Help Now</a>
+            </div>
           </div>
         </div>
-      </div>
-      {% else %}
-      <div class="col-12 text-center text-muted">
-        <p>No jobs posted yet.</p>
       </div>
       {% endfor %}
     </div>
   </div>
-</section>
+  {% endif %}
+
+  <!-- Latest Jobs -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h4 fw-bold mb-0">Latest Problems</h2>
+    <a href="{{ url_for('jobs_list') }}" class="btn btn-link text-decoration-none">View All <i
+        class="bi bi-arrow-right"></i></a>
+  </div>
+  <div class="row g-4">
+    {% if latest %}
+    {% for job in latest %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="badge bg-secondary-subtle text-secondary">{{ job.category }}</span>
+            <span class="fw-bold text-primary">K{{ job.budget }}</span>
+          </div>
+          <h5 class="card-title fw-bold">{{ job.title }}</h5>
+          <p class="card-text text-muted small flex-grow-1">{{ job.description[:120] }}...</p>
+          <hr class="my-3 opacity-25">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="small">
+              <span class="d-block text-dark fw-bold">{{ job.poster_name }}</span>
+              <span class="text-muted" style="font-size: 0.75rem;">{{ job.university }}</span>
+            </div>
+            <a href="{{ url_for('job_details', job_id=job.id) }}"
+              class="btn btn-outline-primary btn-sm rounded-pill px-3">View</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-12 text-center py-5">
+      <div class="mb-3 display-6"><i class="bi bi-emoji-smile-upside-down"></i></div>
+      <p class="text-muted">No problems posted yet. Be the first!</p>
+      <a href="{{ url_for('post_job') }}" class="btn btn-primary">Post a Problem</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

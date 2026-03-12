@@ -3,93 +3,87 @@
 {% block title %}Settings{% endblock %}
 
 {% block content %}
-<style>
-    .settings-card {
-        max-width: 500px;
-        margin: 50px auto 80px;
-        background: #fff;
-        border-radius: 16px;
-        padding: 2.5rem;
-        box-shadow: 0 8px 32px rgba(13, 110, 253, .10);
-    }
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <h2 class="fw-bold mb-4">Account Settings</h2>
 
-    .settings-card h2 {
-        font-weight: 800;
-        color: #0f1117;
-    }
-</style>
+            <form method="POST">
+                <!-- Basic Info Card -->
+                <div class="card p-4 mb-4">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2">Public Profile</h5>
 
-<div class="settings-card">
-    <div class="mb-4 text-center">
-        <div class="mb-2" style="font-size:2.5rem;">⚙️</div>
-        <h2>Account Settings</h2>
-        <p class="text-muted small">Update your profile details below.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Full Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ user.name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Phone Number</label>
+                            <input type="tel" name="phone" class="form-control" value="{{ user.phone or '' }}"
+                                placeholder="097...">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">University</label>
+                            <select name="university" class="form-select">
+                                <option value="{{ user.university }}">{{ user.university }}</option>
+                                <option disabled>──────────</option>
+                                <option>University of Zambia (UNZA)</option>
+                                <option>Copperbelt University (CBU)</option>
+                                <option>Mulungushi University</option>
+                                <option>Kwame Nkrumah University</option>
+                                <option>Chalimbana University</option>
+                                <option>Mukuba University</option>
+                                <option>NIPA</option>
+                                <option>Evelyn Hone College</option>
+                                <option>ZCAS University</option>
+                                <option>Cavendish University Zambia</option>
+                                <option>Texila American University</option>
+                                <option>DMI St Eugene University</option>
+                                <option>Lusaka Apex Medical University</option>
+                                <option>Levy Mwanawasa Medical University</option>
+                                <option>Rockview University</option>
+                                <option>Northrise University</option>
+                                <option>Rusangu University</option>
+                                <option>Zambia Catholic University</option>
+                                <option>Livingstone International University</option>
+                                <option>Zambia Institute of Mass Communication</option>
+                                <option>Natural Resources Development College</option>
+                                <option>Zambia Air Services Training Institute</option>
+                                <option>Northern Technical College (NORTEC)</option>
+                                <option>Lusaka Business and Technical College</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Bio</label>
+                            <textarea name="bio" class="form-control" rows="4"
+                                placeholder="Briefly describe your tech skills or background...">{{ user.bio or '' }}</textarea>
+                            <div class="form-text">Share a bit about yourself with the campus.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-light px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-5">Save Changes</button>
+                </div>
+            </form>
+
+            <hr class="my-5">
+
+            <!-- Security Card -->
+            <div class="card p-4 border-danger border-opacity-25 bg-danger-subtle">
+                <h5 class="fw-bold text-danger mb-3">Privacy & Security</h5>
+                <p class="small text-muted mb-4 text-dark">Take control of your account access and visibility.</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-dark btn-sm text-start"><i class="bi bi-shield-lock me-2"></i>Change
+                        Password</button>
+                    <button class="btn btn-outline-danger btn-sm text-start"><i class="bi bi-trash me-2"></i>Delete
+                        Account permanently</button>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <form method="POST" action="/settings">
-        <!-- Full Name -->
-        <div class="mb-3">
-            <label for="name" class="form-label fw-semibold">Full Name</label>
-            <input type="text" id="name" name="name" class="form-control" value="{{ user.name }}" required />
-        </div>
-
-        <!-- Email (Read Only) -->
-        <div class="mb-3">
-            <label for="email" class="form-label fw-semibold">Email Address</label>
-            <input type="email" id="email" class="form-control" value="{{ user.email }}" disabled />
-            <div class="form-text">You cannot change your email address.</div>
-        </div>
-
-        <!-- University -->
-        <div class="mb-4">
-            <label for="university" class="form-label fw-semibold">University or College</label>
-            <select id="university" name="university" class="form-select" required>
-                <option value="University of Zambia (UNZA)" {% if user.university=='University of Zambia (UNZA)'
-                    %}selected{% endif %}>University of Zambia (UNZA)</option>
-                <option value="Copperbelt University" {% if user.university=='Copperbelt University' %}selected{% endif
-                    %}>Copperbelt University</option>
-                <option value="Mulungushi University" {% if user.university=='Mulungushi University' %}selected{% endif
-                    %}>Mulungushi University</option>
-                <option value="Kwame Nkrumah University" {% if user.university=='Kwame Nkrumah University' %}selected{%
-                    endif %}>Kwame Nkrumah University</option>
-                <option value="Chalimbana University" {% if user.university=='Chalimbana University' %}selected{% endif
-                    %}>Chalimbana University</option>
-                <option value="Mukuba University" {% if user.university=='Mukuba University' %}selected{% endif %}>
-                    Mukuba University</option>
-                <option value="NIPA" {% if user.university=='NIPA' %}selected{% endif %}>NIPA</option>
-                <option value="Evelyn Hone College" {% if user.university=='Evelyn Hone College' %}selected{% endif %}>
-                    Evelyn Hone College</option>
-                <option value="ZCAS University" {% if user.university=='ZCAS University' %}selected{% endif %}>ZCAS
-                    University</option>
-                <option value="Cavendish University Zambia" {% if user.university=='Cavendish University Zambia'
-                    %}selected{% endif %}>Cavendish University Zambia</option>
-                <option value="Texila American University" {% if user.university=='Texila American University'
-                    %}selected{% endif %}>Texila American University</option>
-                <option value="DMI St Eugene University" {% if user.university=='DMI St Eugene University' %}selected{%
-                    endif %}>DMI St Eugene University</option>
-                <option value="Lusaka Apex Medical University" {% if user.university=='Lusaka Apex Medical University'
-                    %}selected{% endif %}>Lusaka Apex Medical University</option>
-                <option value="Levy Mwanawasa Medical University" {% if
-                    user.university=='Levy Mwanawasa Medical University' %}selected{% endif %}>Levy Mwanawasa Medical
-                    University</option>
-                <option value="Rockview University" {% if user.university=='Rockview University' %}selected{% endif %}>
-                    Rockview University</option>
-                <option value="Northrise University" {% if user.university=='Northrise University' %}selected{% endif
-                    %}>Northrise University</option>
-                <option value="Rusangu University" {% if user.university=='Rusangu University' %}selected{% endif %}>
-                    Rusangu University</option>
-                <option value="Zambia Catholic University" {% if user.university=='Zambia Catholic University'
-                    %}selected{% endif %}>Zambia Catholic University</option>
-                <option value="Livingstone International University" {% if
-                    user.university=='Livingstone International University' %}selected{% endif %}>Livingstone
-                    International University</option>
-            </select>
-        </div>
-
-        <!-- Submit -->
-        <button type="submit" class="btn btn-primary w-100 rounded-3">
-            <i class="bi bi-save me-2"></i>Save Changes
-        </button>
-    </form>
 </div>
 {% endblock %}

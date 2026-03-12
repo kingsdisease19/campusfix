@@ -3,173 +3,193 @@
 {% block title %}{{ job.title }}{% endblock %}
 
 {% block content %}
-<style>
-    .job-card {
-        max-width: 760px;
-        margin: 40px auto 20px;
-        background: #fff;
-        border-radius: 16px;
-        padding: 2.5rem;
-        box-shadow: 0 8px 32px rgba(13, 110, 253, .10);
-    }
+<div class="container">
+    <div class="row g-4">
+        <!-- Main Job Info -->
+        <div class="col-lg-8">
+            <div class="card mb-4 overflow-hidden">
+                {% if job.image_filename %}
+                <img src="{{ url_for('static', filename='uploads/' + job.image_filename) }}" class="card-img-top"
+                    style="max-height: 400px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary mb-2">{{ job.category }}</span>
+                            <h2 class="fw-bold">{{ job.title }}</h2>
+                            <p class="text-muted mb-0"><i class="bi bi-geo-alt me-1"></i>{{ job.university }} • <i
+                                    class="bi bi-eye me-1"></i>{{ job.views }} views</p>
+                        </div>
+                        <div class="text-end">
+                            <h3 class="fw-bold text-success mb-0">K{{ job.budget }}</h3>
+                            <span class="badge bg-body-secondary text-dark">{{ job.status.replace('_', ' ').title()
+                                }}</span>
+                        </div>
+                    </div>
 
-    .badge-cat {
-        background: #e8eeff;
-        color: #0d6efd;
-        font-size: .8rem;
-        font-weight: 700;
-        border-radius: 20px;
-        padding: .3rem .9rem;
-    }
+                    <hr>
+                    <h5 class="fw-bold mb-2">Description</h5>
+                    <p class="lead" style="font-size: 1.1rem; white-space: pre-line;">{{ job.description }}</p>
 
-    .budget-tag {
-        background: #dcfce7;
-        color: #16a34a;
-        font-weight: 700;
-        border-radius: 8px;
-        padding: .3rem .8rem;
-        font-size: .9rem;
-    }
-
-    .job-image {
-        width: 100%;
-        max-height: 400px;
-        object-fit: cover;
-        border-radius: 12px;
-        margin-top: 1.5rem;
-        border: 1px solid #e5e7eb;
-    }
-
-    .meta-row {
-        color: #6b7280;
-        font-size: .875rem;
-    }
-
-    /* Offer form */
-    .offer-card {
-        max-width: 760px;
-        margin: 0 auto 20px;
-        background: #fff;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 16px rgba(13, 110, 253, .08);
-    }
-
-    .offer-card h5 {
-        font-weight: 700;
-    }
-
-    /* Individual offer responses */
-    .offer-item {
-        background: #f8faff;
-        border-radius: 12px;
-        padding: 1rem 1.25rem;
-        border-left: 4px solid #0d6efd;
-        margin-bottom: .75rem;
-    }
-
-    .offer-item .helper-name {
-        font-weight: 700;
-        font-size: .9rem;
-    }
-
-    .offer-item .helper-uni {
-        font-size: .78rem;
-        color: #6b7280;
-    }
-
-    .offer-item .offer-msg {
-        margin-top: .4rem;
-        color: #374151;
-        font-size: .9rem;
-    }
-</style>
-
-<!-- Job Details Card -->
-<div class="job-card">
-    <p class="mb-3">
-        <a href="/jobs" class="text-decoration-none text-muted small">
-            <i class="bi bi-arrow-left me-1"></i>Back to Jobs
-        </a>
-    </p>
-
-    <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-        <span class="badge-cat"><i class="bi bi-tag me-1"></i>{{ job.category }}</span>
-        <span class="budget-tag"><i class="bi bi-cash me-1"></i>K{{ job.budget|float|int }}</span>
-    </div>
-
-    <h1 class="fw-bold fs-3 mb-3">{{ job.title }}</h1>
-
-    <div class="meta-row d-flex flex-wrap gap-3 mb-4">
-        <span><i class="bi bi-building me-1"></i>{{ job.university }}</span>
-        <span><i class="bi bi-person me-1"></i>Posted by {{ job.poster_name }}</span>
-        <span><i class="bi bi-clock me-1"></i>{{ job.created_at.strftime('%d %b %Y') if job.created_at else '' }}</span>
-    </div>
-
-    {% if job.image_filename %}
-    <img src="{{ url_for('static', filename='uploads/' + job.image_filename) }}" alt="Problem photo"
-        class="job-image" />
-    {% endif %}
-
-    <div class="mt-4">
-        <h5 class="fw-bold mb-2">Problem Description</h5>
-        <p class="text-muted" style="line-height:1.75; white-space: pre-wrap;">{{ job.description }}</p>
-    </div>
-</div>
-
-<!-- ── Offer Help Form ───────────────────────────────────── -->
-{% if session.get('user_id') and session.get('user_id') != job.user_id %}
-<div class="offer-card">
-    {% if already_offered %}
-    <div class="alert alert-success mb-0">
-        <i class="bi bi-check-circle me-2"></i>
-        <strong>Offer sent!</strong> You have already offered help on this job.
-    </div>
-    {% else %}
-    <h5 class="mb-1"><i class="bi bi-hand-thumbs-up me-2 text-primary"></i>Offer Your Help</h5>
-    <p class="text-muted small mb-3">Introduce yourself and explain how you can fix this problem.</p>
-    <form method="POST" action="/job/{{ job.id }}/offer">
-        <div class="mb-3">
-            <textarea name="message" class="form-control" rows="4"
-                placeholder="e.g. Hi! I'm a 3rd-year CS student and I've fixed this exact WiFi issue before. I can meet you at the campus library tomorrow..."
-                required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary px-4">
-            <i class="bi bi-send me-2"></i>Offer Help
-        </button>
-    </form>
-    {% endif %}
-</div>
-{% elif not session.get('user_id') %}
-<div class="offer-card text-center py-4">
-    <p class="mb-2 text-muted">Want to help with this problem?</p>
-    <a href="/login" class="btn btn-primary px-4">Log in to Offer Help</a>
-</div>
-{% endif %}
-
-<!-- ── Offers Received ───────────────────────────────────── -->
-{% if offers %}
-<div class="offer-card">
-    <h5 class="mb-3">
-        <i class="bi bi-people me-2 text-primary"></i>
-        {{ offers|length }} Offer{{ 's' if offers|length != 1 else '' }} Received
-    </h5>
-    {% for offer in offers %}
-    <div class="offer-item">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <span class="helper-name"><i class="bi bi-person-circle me-1"></i>{{ offer.helper_name }}</span>
-                <span class="helper-uni ms-2">· {{ offer.helper_university }}</span>
+                    {% if job.deadline %}
+                    <div class="alert alert-warning py-2 mb-0 d-inline-block small fw-bold">
+                        <i class="bi bi-clock-fill me-2"></i>Deadline: {{ job.deadline.strftime('%d %B, %Y') }}
+                    </div>
+                    {% endif %}
+                </div>
             </div>
-            <span class="text-muted" style="font-size:.75rem;">
-                {{ offer.created_at.strftime('%d %b %Y') if offer.created_at else '' }}
-            </span>
-        </div>
-        <p class="offer-msg mb-0">{{ offer.message }}</p>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
 
-<div style="height:40px;"></div>
+            <!-- Offers Section -->
+            <h4 class="fw-bold mb-3">Service Offers ({{ offers|length }})</h4>
+            {% if offers %}
+            {% for offer in offers %}
+            <div class="card mb-3 {% if offer.is_accepted %}border-success border-2{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                style="width: 45px; height: 45px;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div>
+                                <a href="{{ url_for('profile', user_id=offer.helper_id) }}"
+                                    class="fw-bold text-decoration-none d-block">{{ offer.helper_name }}</a>
+                                <small class="text-muted">{{ offer.helper_uni }} • {{ offer.created_at.strftime('%d %b')
+                                    }}</small>
+                            </div>
+                        </div>
+                        {% if session.get('user_id') == job.user_id and job.status == 'open' %}
+                        <form action="{{ url_for('accept_offer', offer_id=offer.id) }}" method="POST">
+                            <button type="submit" class="btn btn-success btn-sm px-4 fw-bold">Accept Offer</button>
+                        </form>
+                        {% elif offer.is_accepted %}
+                        <span class="badge bg-success py-2 px-3 fw-bold">Accepted</span>
+                        {% endif %}
+                    </div>
+                    <p class="mb-0">{{ offer.message }}</p>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="card bg-light border-dashed text-center p-4">
+                <p class="text-muted mb-0">No offers yet. Be the first to help!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar / Action Panel -->
+        <div class="col-lg-4">
+            <!-- Poster Card -->
+            <div class="card mb-4 text-center p-4">
+                <h6 class="text-muted small fw-bold text-uppercase mb-3">Posted By</h6>
+                <div class="bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                    style="width: 80px; height: 80px;">
+                    <i class="bi bi-person display-6"></i>
+                </div>
+                <h5 class="fw-bold mb-1">{{ job.poster_name }}</h5>
+                <div class="mb-3 text-warning">
+                    {% if job.avg_rating %}
+                    {% for i in range(5) %}
+                    <i class="bi bi-star{{ '-fill' if i < job.avg_rating|int else '' }}"></i>
+                    {% endfor %}
+                    <span class="small text-muted ms-1">({{ job.avg_rating|round(1) }})</span>
+                    {% else %}
+                    <span class="text-muted small">No ratings yet</span>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('profile', user_id=job.poster_id) }}"
+                    class="btn btn-outline-primary btn-sm w-100 mb-2">View Profile</a>
+
+                {% if session.get('user_id') and session.get('user_id') != job.poster_id %}
+                <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#msgModal">
+                    <i class="bi bi-chat-dots me-2"></i>Message Poster
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- Action Panel -->
+            {% if session.get('user_id') %}
+            {% if session.get('user_id') != job.poster_id %}
+            <div class="card p-4 bg-primary text-white">
+                <h5 class="fw-bold mb-3">Offer Your Help</h5>
+                <form action="{{ url_for('submit_offer', job_id=job.id) }}" method="POST">
+                    <div class="mb-3">
+                        <textarea name="message" class="form-control" rows="4"
+                            placeholder="How can you help? Mention your experience..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-light text-primary fw-bold w-100">Submit Offer</button>
+                </form>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="card p-4 bg-light text-center border-dashed">
+                <p class="mb-3">Login to offer help or message the student.</p>
+                <a href="{{ url_for('login') }}" class="btn btn-primary">Login Now</a>
+            </div>
+            {% endif %}
+
+            <!-- Report Button -->
+            <div class="text-center mt-3">
+                <button class="btn btn-link text-danger text-decoration-none small" data-bs-toggle="modal"
+                    data-bs-target="#reportModal">
+                    <i class="bi bi-flag me-1"></i>Report this problem
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Message Modal -->
+<div class="modal fade" id="msgModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Message {{ job.poster_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('send_msg') }}" method="POST">
+                <input type="hidden" name="receiver_id" value="{{ job.poster_id }}">
+                <input type="hidden" name="job_id" value="{{ job.id }}">
+                <div class="modal-body">
+                    <textarea name="body" class="form-control" rows="4"
+                        placeholder="Hello, I'm interested in helping with..." required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary px-4">Send Message</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Report Problem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-3">Help us keep CampusFix safe. Why are you reporting this?</p>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Reason</label>
+                    <select class="form-select">
+                        <option>Spam or scam</option>
+                        <option>Inappropriate content</option>
+                        <option>Misleading information</option>
+                        <option>Other policy violation</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Details (optional)</label>
+                    <textarea class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger px-4">Submit Report</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
