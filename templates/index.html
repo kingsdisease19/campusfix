@@ -98,7 +98,7 @@
             {{ job.description[:100] }}{% if job.description|length > 100 %}...{% endif %}
           </p>
           <div class="d-flex justify-content-between align-items-center mt-auto">
-            <span class="budget">Budget: K{{ "%.0f"|format(job.budget) }}</span>
+            <span class="budget">Budget: K{{ "%.0f"|format(job.budget|float) }}</span>
             <a href="/job/{{ job.id }}" class="btn btn-outline-primary btn-sm">View Details</a>
           </div>
         </div>

@@ -4,7 +4,6 @@
 
 {% block content %}
 <style>
-  /* Dashboard layout */
   .dashboard-header {
     background: linear-gradient(135deg, #0d6efd 0%, #1a3fce 100%);
     color: #fff;
@@ -17,7 +16,7 @@
     font-size: 2.2rem;
   }
 
-  .dashboard-header .badge-uni {
+  .badge-uni {
     background: rgba(255, 255, 255, 0.2);
     padding: .4rem 1rem;
     border-radius: 20px;
@@ -25,7 +24,13 @@
     font-weight: 600;
   }
 
-  /* Cards */
+  .section-title {
+    font-weight: 800;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Job cards */
   .card {
     border: none;
     border-radius: 14px;
@@ -50,10 +55,24 @@
     padding: .2rem .6rem;
   }
 
+  .offer-badge {
+    background: #fff3cd;
+    color: #92400e;
+    font-size: .75rem;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: .3rem .9rem;
+  }
+
+  .offer-badge.has-offers {
+    background: #dcfce7;
+    color: #166534;
+  }
+
   /* Empty state */
   .empty-state {
     text-align: center;
-    padding: 60px 20px;
+    padding: 40px 20px;
     color: #9ca3af;
     background: #fff;
     border-radius: 14px;
@@ -61,12 +80,12 @@
   }
 
   .empty-state .icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 2.5rem;
+    margin-bottom: .75rem;
   }
 </style>
 
-<!-- Dashboard Header -->
+<!-- Header -->
 <div class="dashboard-header text-center">
   <div class="container">
     <div class="mb-3" style="font-size:3rem;">👋</div>
@@ -78,29 +97,32 @@
 </div>
 
 <div class="container pb-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold mb-0">Your Posted Jobs</h3>
+
+  <!-- ── Section 1: Jobs You Posted ── -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="section-title mb-0">📋 Jobs You Posted</h2>
     <a href="/post-job" class="btn btn-primary fw-bold px-4">
       <i class="bi bi-plus-circle me-1"></i>Post a Job
     </a>
   </div>
 
-  {% if jobs %}
-  <div class="row g-4">
-    {% for job in jobs %}
+  {% if posted_jobs %}
+  <div class="row g-4 mb-5">
+    {% for job in posted_jobs %}
     <div class="col-md-6 col-lg-4">
       <div class="card p-4 h-100">
-        <span class="badge-cat mb-2 d-inline-block align-self-start">
-          <i class="bi bi-tag me-1"></i>{{ job.category }}
-        </span>
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <span class="badge-cat"><i class="bi bi-tag me-1"></i>{{ job.category }}</span>
+          <span class="offer-badge {% if job.offer_count > 0 %}has-offers{% endif %}">
+            {{ job.offer_count }} offer{{ 's' if job.offer_count != 1 else '' }}
+          </span>
+        </div>
         <h5 class="fw-bold">{{ job.title }}</h5>
         <p class="text-muted small mb-3">
           {{ job.description[:100] }}{% if job.description|length > 100 %}...{% endif %}
         </p>
         <div class="d-flex justify-content-between align-items-center mt-auto">
-          <span class="budget">
-            <i class="bi bi-cash me-1"></i>K{{ job.budget }}
-          </span>
+          <span class="budget"><i class="bi bi-cash me-1"></i>K{{ job.budget|float|int }}</span>
           <a href="/job/{{ job.id }}" class="btn btn-outline-primary btn-sm">View Details</a>
         </div>
       </div>
@@ -108,12 +130,48 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty-state">
+  <div class="empty-state mb-5">
     <div class="icon">📝</div>
     <h5 class="fw-bold text-dark">No active jobs</h5>
     <p>You haven't posted any jobs yet.</p>
     <a href="/post-job" class="btn btn-primary px-4 mt-2">Post Your First Job</a>
   </div>
   {% endif %}
+
+  <!-- ── Section 2: Jobs You Offered Help On ── -->
+  <h2 class="section-title mb-3">🤝 Jobs You Offered Help On</h2>
+
+  {% if offered_jobs %}
+  <div class="row g-4">
+    {% for item in offered_jobs %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card p-4 h-100">
+        <span class="badge-cat mb-2 d-inline-block align-self-start">
+          <i class="bi bi-tag me-1"></i>{{ item.category }}
+        </span>
+        <h5 class="fw-bold">{{ item.title }}</h5>
+        <p class="text-muted small mb-1">
+          <i class="bi bi-building me-1"></i>{{ item.university }}
+        </p>
+        <p class="text-muted small mb-3" style="font-style:italic;">
+          "{{ item.message[:80] }}{% if item.message|length > 80 %}...{% endif %}"
+        </p>
+        <div class="d-flex justify-content-between align-items-center mt-auto">
+          <span class="budget"><i class="bi bi-cash me-1"></i>K{{ item.budget|float|int }}</span>
+          <a href="/job/{{ item.id }}" class="btn btn-outline-primary btn-sm">View Job</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">🤝</div>
+    <h5 class="fw-bold text-dark">No offers yet</h5>
+    <p>Browse jobs and offer help to earn money.</p>
+    <a href="/jobs" class="btn btn-primary px-4 mt-2">Browse Jobs</a>
+  </div>
+  {% endif %}
+
 </div>
 {% endblock %}

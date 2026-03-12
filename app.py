@@ -90,6 +90,21 @@ def init_db():
     except Exception:
         conn.rollback()   # column already exists – that's fine
 
+    # Offers table
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS offers (
+            id         SERIAL PRIMARY KEY,
+            job_id     INTEGER NOT NULL,
+            helper_id  INTEGER NOT NULL,
+            message    TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (job_id)    REFERENCES jobs(id),
+            FOREIGN KEY (helper_id) REFERENCES users(id),
+            UNIQUE (job_id, helper_id)
+        )
+    """)
+    conn.commit()
     cur.close()
     conn.close()
 
@@ -194,26 +209,48 @@ def logout():
 
 @app.route("/dashboard")
 def dashboard():
-    """Show the user's dashboard with their posted jobs."""
+    """Show the user's dashboard – jobs posted and jobs offered help on."""
     if login_required():
         flash("Please log in to view your dashboard.", "warning")
         return redirect(url_for("login"))
-        
+
+    user_id = session["user_id"]
     conn = get_db()
     cur = conn.cursor()
+
+    # -- Jobs the user posted, with a count of offers received -----------
     cur.execute(
-        "SELECT * FROM jobs WHERE user_id = %s ORDER BY created_at DESC", 
-        (session["user_id"],)
+        """SELECT jobs.*,
+                  COUNT(offers.id) AS offer_count
+           FROM jobs
+           LEFT JOIN offers ON offers.job_id = jobs.id
+           WHERE jobs.user_id = %s
+           GROUP BY jobs.id
+           ORDER BY jobs.created_at DESC""",
+        (user_id,)
     )
-    user_jobs = cur.fetchall()
+    posted_jobs = cur.fetchall()
+
+    # -- Jobs the user has offered help on --------------------------------
+    cur.execute(
+        """SELECT jobs.*, offers.message
+           FROM offers
+           JOIN jobs ON offers.job_id = jobs.id
+           WHERE offers.helper_id = %s
+           ORDER BY offers.created_at DESC""",
+        (user_id,)
+    )
+    offered_jobs = cur.fetchall()
+
     cur.close()
     conn.close()
-    
+
     return render_template(
-        "dashboard.html", 
+        "dashboard.html",
         name=session.get("user_name"),
         university=session.get("user_university"),
-        jobs=user_jobs
+        posted_jobs=posted_jobs,
+        offered_jobs=offered_jobs
     )
 
 
@@ -395,11 +432,68 @@ def job_details(job_id):
         flash("Job not found.", "danger")
         return redirect(url_for("jobs"))
 
+    # Also fetch existing offers for this job
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT offers.*, users.name AS helper_name, users.university AS helper_university
+           FROM offers
+           JOIN users ON offers.helper_id = users.id
+           WHERE offers.job_id = %s
+           ORDER BY offers.created_at DESC""",
+        (job_id,)
+    )
+    offers = cur.fetchall()
+
+    # Check if the current user already made an offer
+    already_offered = False
+    if session.get("user_id"):
+        cur.execute(
+            "SELECT id FROM offers WHERE job_id = %s AND helper_id = %s",
+            (job_id, session["user_id"])
+        )
+        already_offered = cur.fetchone() is not None
+
+    cur.close()
+    conn.close()
+
     return render_template(
         "job_details.html",
         job=job,
+        offers=offers,
+        already_offered=already_offered,
         name=session.get("user_name")
     )
+
+
+# ---------- Offer Help ----------
+@app.route("/job/<int:job_id>/offer", methods=["POST"])
+def offer_help(job_id):
+    if login_required():
+        flash("Please log in to offer help.", "warning")
+        return redirect(url_for("login"))
+
+    message = request.form.get("message", "").strip()
+    if not message:
+        flash("Please write a message before submitting your offer.", "danger")
+        return redirect(url_for("job_details", job_id=job_id))
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+        cur.execute(
+            "INSERT INTO offers (job_id, helper_id, message) VALUES (%s, %s, %s)",
+            (job_id, session["user_id"], message)
+        )
+        conn.commit()
+        flash("Your offer has been submitted! The job poster will be in touch.", "success")
+    except psycopg.IntegrityError:
+        conn.rollback()
+        flash("You have already offered help on this job.", "warning")
+
+    cur.close()
+    conn.close()
+    return redirect(url_for("job_details", job_id=job_id))
 
 
 # ── Start ────────────────────────────────────────────────────

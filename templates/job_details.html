@@ -5,8 +5,8 @@
 {% block content %}
 <style>
     .job-card {
-        max-width: 720px;
-        margin: 40px auto 80px;
+        max-width: 760px;
+        margin: 40px auto 20px;
         background: #fff;
         border-radius: 16px;
         padding: 2.5rem;
@@ -44,17 +44,55 @@
         color: #6b7280;
         font-size: .875rem;
     }
+
+    /* Offer form */
+    .offer-card {
+        max-width: 760px;
+        margin: 0 auto 20px;
+        background: #fff;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 16px rgba(13, 110, 253, .08);
+    }
+
+    .offer-card h5 {
+        font-weight: 700;
+    }
+
+    /* Individual offer responses */
+    .offer-item {
+        background: #f8faff;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        border-left: 4px solid #0d6efd;
+        margin-bottom: .75rem;
+    }
+
+    .offer-item .helper-name {
+        font-weight: 700;
+        font-size: .9rem;
+    }
+
+    .offer-item .helper-uni {
+        font-size: .78rem;
+        color: #6b7280;
+    }
+
+    .offer-item .offer-msg {
+        margin-top: .4rem;
+        color: #374151;
+        font-size: .9rem;
+    }
 </style>
 
+<!-- Job Details Card -->
 <div class="job-card">
-    <!-- Back link -->
     <p class="mb-3">
         <a href="/jobs" class="text-decoration-none text-muted small">
             <i class="bi bi-arrow-left me-1"></i>Back to Jobs
         </a>
     </p>
 
-    <!-- Header -->
     <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
         <span class="badge-cat"><i class="bi bi-tag me-1"></i>{{ job.category }}</span>
         <span class="budget-tag"><i class="bi bi-cash me-1"></i>K{{ job.budget|float|int }}</span>
@@ -62,30 +100,76 @@
 
     <h1 class="fw-bold fs-3 mb-3">{{ job.title }}</h1>
 
-    <!-- Meta info -->
     <div class="meta-row d-flex flex-wrap gap-3 mb-4">
         <span><i class="bi bi-building me-1"></i>{{ job.university }}</span>
         <span><i class="bi bi-person me-1"></i>Posted by {{ job.poster_name }}</span>
         <span><i class="bi bi-clock me-1"></i>{{ job.created_at.strftime('%d %b %Y') if job.created_at else '' }}</span>
     </div>
 
-    <!-- Optional photo -->
     {% if job.image_filename %}
     <img src="{{ url_for('static', filename='uploads/' + job.image_filename) }}" alt="Problem photo"
         class="job-image" />
     {% endif %}
 
-    <!-- Description -->
     <div class="mt-4">
         <h5 class="fw-bold mb-2">Problem Description</h5>
         <p class="text-muted" style="line-height:1.75; white-space: pre-wrap;">{{ job.description }}</p>
     </div>
+</div>
 
-    {% if session.get('user_id') and session.get('user_id') != job.user_id %}
-    <div class="mt-4 p-3 bg-light rounded-3">
-        <p class="mb-1 fw-semibold"><i class="bi bi-hand-thumbs-up me-1"></i>Think you can fix this?</p>
-        <p class="text-muted small mb-0">Contact the poster through your institution's channels to offer your help.</p>
+<!-- ── Offer Help Form ───────────────────────────────────── -->
+{% if session.get('user_id') and session.get('user_id') != job.user_id %}
+<div class="offer-card">
+    {% if already_offered %}
+    <div class="alert alert-success mb-0">
+        <i class="bi bi-check-circle me-2"></i>
+        <strong>Offer sent!</strong> You have already offered help on this job.
     </div>
+    {% else %}
+    <h5 class="mb-1"><i class="bi bi-hand-thumbs-up me-2 text-primary"></i>Offer Your Help</h5>
+    <p class="text-muted small mb-3">Introduce yourself and explain how you can fix this problem.</p>
+    <form method="POST" action="/job/{{ job.id }}/offer">
+        <div class="mb-3">
+            <textarea name="message" class="form-control" rows="4"
+                placeholder="e.g. Hi! I'm a 3rd-year CS student and I've fixed this exact WiFi issue before. I can meet you at the campus library tomorrow..."
+                required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-send me-2"></i>Offer Help
+        </button>
+    </form>
     {% endif %}
 </div>
+{% elif not session.get('user_id') %}
+<div class="offer-card text-center py-4">
+    <p class="mb-2 text-muted">Want to help with this problem?</p>
+    <a href="/login" class="btn btn-primary px-4">Log in to Offer Help</a>
+</div>
+{% endif %}
+
+<!-- ── Offers Received ───────────────────────────────────── -->
+{% if offers %}
+<div class="offer-card">
+    <h5 class="mb-3">
+        <i class="bi bi-people me-2 text-primary"></i>
+        {{ offers|length }} Offer{{ 's' if offers|length != 1 else '' }} Received
+    </h5>
+    {% for offer in offers %}
+    <div class="offer-item">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <span class="helper-name"><i class="bi bi-person-circle me-1"></i>{{ offer.helper_name }}</span>
+                <span class="helper-uni ms-2">· {{ offer.helper_university }}</span>
+            </div>
+            <span class="text-muted" style="font-size:.75rem;">
+                {{ offer.created_at.strftime('%d %b %Y') if offer.created_at else '' }}
+            </span>
+        </div>
+        <p class="offer-msg mb-0">{{ offer.message }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div style="height:40px;"></div>
 {% endblock %}
