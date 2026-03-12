@@ -1,0 +1,80 @@
+<!-- ============================================================
+     templates/register.html
+     User registration page
+     ============================================================ -->
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+
+  <!-- Header -->
+  <div class="text-center mb-4">
+    <div class="mb-2" style="font-size:2.5rem;">🎓</div>
+    <h2>Create Account</h2>
+    <p class="subtitle">Join CampusFix and start getting tech help on campus</p>
+  </div>
+
+  <!-- Registration Form -->
+  <!--
+    method="POST"  → sends data to the /register route
+    action=""      → submits to the same URL (/register)
+  -->
+  <form method="POST" action="/register">
+
+    <!-- Full Name -->
+    <div class="mb-3">
+      <label for="name" class="form-label fw-semibold">Full Name</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        class="form-control"
+        placeholder="e.g. Chanda Mwansa"
+        required
+      />
+    </div>
+
+    <!-- Email -->
+    <div class="mb-3">
+      <label for="email" class="form-label fw-semibold">Email Address</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        class="form-control"
+        placeholder="e.g. chanda@student.unza.zm"
+        required
+      />
+    </div>
+
+    <!-- Password -->
+    <div class="mb-4">
+      <label for="password" class="form-label fw-semibold">Password</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        class="form-control"
+        placeholder="At least 6 characters"
+        required
+      />
+      <div class="form-text">Your password will be stored securely.</div>
+    </div>
+
+    <!-- Submit button -->
+    <button type="submit" class="btn btn-primary w-100 rounded-3">
+      <i class="bi bi-person-plus me-2"></i>Create My Account
+    </button>
+
+  </form>
+
+  <!-- Link to login page -->
+  <hr class="my-4"/>
+  <p class="text-center text-muted mb-0" style="font-size:.9rem;">
+    Already have an account?
+    <a href="/login" class="text-decoration-none fw-semibold">Log in here</a>
+  </p>
+
+</div>
+{% endblock %}

@@ -1,0 +1,210 @@
+<!-- ============================================================
+     templates/job_details.html
+     Save in:  campusfix/templates/job_details.html
+     Full detail view for a single job posting
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CampusFix – {{ job['title'] }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <style>
+    body { background: #f0f4ff; font-family: 'Segoe UI', sans-serif; }
+
+    .navbar { background: #fff; border-bottom: 1px solid #e5e7eb; }
+    .navbar-brand { font-weight: 800; font-size: 1.4rem; color: #0d6efd !important; }
+    .navbar-brand span { color: #f59e0b; }
+
+    /* Main content card */
+    .detail-card {
+      max-width: 720px;
+      margin: 50px auto 80px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 8px 32px rgba(13,110,253,.10);
+    }
+
+    .cat-badge {
+      font-size: .8rem;
+      font-weight: 600;
+      background: #e8eeff;
+      color: #0d6efd;
+      padding: .3rem .85rem;
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    .detail-card h2 { font-weight: 800; color: #0f1117; margin: .6rem 0; }
+
+    /* Info strip (budget, poster, date) */
+    .info-strip {
+      background: #f8f9ff;
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .info-item { display: flex; align-items: center; gap: .5rem; }
+    .info-label { font-size: .78rem; color: #9ca3af; font-weight: 600;
+                  text-transform: uppercase; letter-spacing: .5px; }
+    .info-value { font-weight: 700; font-size: 1.05rem; color: #0f1117; }
+
+    /* Budget highlight */
+    .budget-big {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #16a34a;
+    }
+
+    /* Description box */
+    .description-box {
+      background: #fafafa;
+      border-left: 4px solid #0d6efd;
+      border-radius: 0 10px 10px 0;
+      padding: 1.2rem 1.5rem;
+      line-height: 1.75;
+      color: #374151;
+      white-space: pre-wrap; /* preserves line breaks the user typed */
+    }
+
+    /* Offer Help button */
+    .btn-offer {
+      background: #0d6efd;
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: .8rem 2rem;
+      border-radius: 10px;
+      transition: background .15s, transform .15s;
+    }
+    .btn-offer:hover {
+      background: #1a3fce;
+      transform: translateY(-2px);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">Campus<span>Fix</span></a>
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <a href="/post-job" class="btn btn-primary btn-sm px-3">
+          <i class="bi bi-plus-circle me-1"></i>Post a Job
+        </a>
+        {% if name %}
+          <span class="text-muted small d-none d-md-inline">
+            <i class="bi bi-person-circle me-1"></i>{{ name }}
+          </span>
+          <a href="/logout" class="btn btn-outline-danger btn-sm">Logout</a>
+        {% else %}
+          <a href="/login"    class="btn btn-outline-primary btn-sm">Login</a>
+          <a href="/register" class="btn btn-outline-secondary btn-sm">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash messages -->
+  <div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Detail card -->
+  <div class="detail-card">
+
+    <!-- Back link -->
+    <p class="mb-3">
+      <a href="/jobs" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left me-1"></i>Back to all jobs
+      </a>
+    </p>
+
+    <!-- Category badge + Title -->
+    <span class="cat-badge">{{ job['category'] }}</span>
+    <h2>{{ job['title'] }}</h2>
+
+    <!-- Info strip: budget / posted by / date -->
+    <div class="info-strip">
+      <div class="row g-3">
+
+        <!-- Budget -->
+        <div class="col-sm-4">
+          <div class="info-label mb-1">Budget</div>
+          <div class="budget-big">K{{ "%.0f"|format(job['budget']) }}</div>
+        </div>
+
+        <!-- Posted by -->
+        <div class="col-sm-4">
+          <div class="info-label mb-1">Posted by</div>
+          <div class="info-value">
+            <i class="bi bi-person-circle text-primary me-1"></i>
+            {{ job['poster_name'] }}
+          </div>
+        </div>
+
+        <!-- Date -->
+        <div class="col-sm-4">
+          <div class="info-label mb-1">Posted on</div>
+          <div class="info-value" style="font-size:.95rem;">
+            {{ job['created_at'][:10] }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Full description -->
+    <h6 class="fw-bold mb-2">Problem Description</h6>
+    <div class="description-box mb-4">{{ job['description'] }}</div>
+
+    <!-- Offer Help button -->
+    <!--
+      For now this just links to register/login.
+      You can later link this to a real offer/message system.
+    -->
+    {% if name %}
+      <div class="d-grid">
+        <button class="btn-offer">
+          <i class="bi bi-hand-thumbs-up me-2"></i>Offer to Help – K{{ "%.0f"|format(job['budget']) }}
+        </button>
+      </div>
+      <p class="text-muted small text-center mt-2">
+        Clicking this will let {{ job['poster_name'] }} know you can help.
+      </p>
+    {% else %}
+      <div class="d-grid">
+        <a href="/login" class="btn-offer text-center text-decoration-none">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Log in to Offer Help
+        </a>
+      </div>
+      <p class="text-muted small text-center mt-2">
+        You need an account to offer help on this job.
+      </p>
+    {% endif %}
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center py-4 bg-dark text-secondary">
+    <small>CampusFix &copy; 2026 – Student Tech Marketplace</small>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
