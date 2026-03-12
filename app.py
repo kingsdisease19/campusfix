@@ -4,14 +4,26 @@
 #  Run with:          python app.py
 # ============================================================
 
+import os
+import uuid
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import psycopg
 from psycopg.rows import dict_row
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
 # ── App setup ────────────────────────────────────────────────
 app = Flask(__name__)
 app.secret_key = "campusfix_secret_2026"
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB max upload
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 # In a real app, load this from environment variables
 # Updated connection details based on your request
 DB_HOST = "localhost"
@@ -50,23 +62,34 @@ def init_db():
         )
     """)
 
-    # Jobs table (NEW)
+    # Jobs table
     # user_id links each job back to the student who posted it
     cur.execute("""
         CREATE TABLE IF NOT EXISTS jobs (
-            id          SERIAL PRIMARY KEY,
-            title       VARCHAR(200) NOT NULL,
-            description TEXT    NOT NULL,
-            category    VARCHAR(100) NOT NULL,
-            budget      VARCHAR(50) NOT NULL,
-            university  VARCHAR(150) NOT NULL,
-            user_id     INTEGER NOT NULL,
-            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            id             SERIAL PRIMARY KEY,
+            title          VARCHAR(200) NOT NULL,
+            description    TEXT    NOT NULL,
+            category       VARCHAR(100) NOT NULL,
+            budget         VARCHAR(50)  NOT NULL,
+            university     VARCHAR(150) NOT NULL,
+            image_filename VARCHAR(300),
+            user_id        INTEGER NOT NULL,
+            created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
     """)
 
     conn.commit()
+
+    # Migration: safely add image_filename column if the table already exists without it
+    try:
+        cur = conn.cursor()
+        cur.execute("ALTER TABLE jobs ADD COLUMN image_filename VARCHAR(300)")
+        conn.commit()
+        cur.close()
+    except Exception:
+        conn.rollback()   # column already exists – that's fine
+
     cur.close()
     conn.close()
 
@@ -260,27 +283,38 @@ def post_job():
         category    = request.form["category"]
         budget      = request.form["budget"].strip()
 
-        # Validate all fields are filled
+        # Validate required fields
         if not title or not description or not category or not budget:
             flash("Please fill in all fields.", "danger")
             return redirect(url_for("post_job"))
 
-        # Make sure budget is a valid positive number
+        # Validate budget
         try:
-            budget = float(budget)
-            if budget <= 0:
+            budget_val = float(budget)
+            if budget_val <= 0:
                 raise ValueError
         except ValueError:
             flash("Budget must be a positive number e.g. 50", "danger")
             return redirect(url_for("post_job"))
 
-        # Save job to the database, linking it to the logged-in user
+        # Handle optional image upload
+        image_filename = None
+        file = request.files.get("image")
+        if file and file.filename and allowed_file(file.filename):
+            ext = file.filename.rsplit(".", 1)[1].lower()
+            # Use a unique name to avoid collisions
+            unique_name = f"{uuid.uuid4().hex}.{ext}"
+            file.save(os.path.join(UPLOAD_FOLDER, unique_name))
+            image_filename = unique_name
+
+        # Save job to the database
         conn = get_db()
         cur = conn.cursor()
         cur.execute(
-            """INSERT INTO jobs (title, description, category, budget, university, user_id)
-               VALUES (%s, %s, %s, %s, %s, %s)""",
-            (title, description, category, budget, session["user_university"], session["user_id"])
+            """INSERT INTO jobs (title, description, category, budget, university, image_filename, user_id)
+               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+            (title, description, category, str(budget_val), session["user_university"],
+             image_filename, session["user_id"])
         )
         conn.commit()
         cur.close()

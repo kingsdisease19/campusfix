@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }}{% endblock %}
+
+{% block content %}
+<style>
+    .job-card {
+        max-width: 720px;
+        margin: 40px auto 80px;
+        background: #fff;
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 32px rgba(13, 110, 253, .10);
+    }
+
+    .badge-cat {
+        background: #e8eeff;
+        color: #0d6efd;
+        font-size: .8rem;
+        font-weight: 700;
+        border-radius: 20px;
+        padding: .3rem .9rem;
+    }
+
+    .budget-tag {
+        background: #dcfce7;
+        color: #16a34a;
+        font-weight: 700;
+        border-radius: 8px;
+        padding: .3rem .8rem;
+        font-size: .9rem;
+    }
+
+    .job-image {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-top: 1.5rem;
+        border: 1px solid #e5e7eb;
+    }
+
+    .meta-row {
+        color: #6b7280;
+        font-size: .875rem;
+    }
+</style>
+
+<div class="job-card">
+    <!-- Back link -->
+    <p class="mb-3">
+        <a href="/jobs" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left me-1"></i>Back to Jobs
+        </a>
+    </p>
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+        <span class="badge-cat"><i class="bi bi-tag me-1"></i>{{ job.category }}</span>
+        <span class="budget-tag"><i class="bi bi-cash me-1"></i>K{{ job.budget|float|int }}</span>
+    </div>
+
+    <h1 class="fw-bold fs-3 mb-3">{{ job.title }}</h1>
+
+    <!-- Meta info -->
+    <div class="meta-row d-flex flex-wrap gap-3 mb-4">
+        <span><i class="bi bi-building me-1"></i>{{ job.university }}</span>
+        <span><i class="bi bi-person me-1"></i>Posted by {{ job.poster_name }}</span>
+        <span><i class="bi bi-clock me-1"></i>{{ job.created_at.strftime('%d %b %Y') if job.created_at else '' }}</span>
+    </div>
+
+    <!-- Optional photo -->
+    {% if job.image_filename %}
+    <img src="{{ url_for('static', filename='uploads/' + job.image_filename) }}" alt="Problem photo"
+        class="job-image" />
+    {% endif %}
+
+    <!-- Description -->
+    <div class="mt-4">
+        <h5 class="fw-bold mb-2">Problem Description</h5>
+        <p class="text-muted" style="line-height:1.75; white-space: pre-wrap;">{{ job.description }}</p>
+    </div>
+
+    {% if session.get('user_id') and session.get('user_id') != job.user_id %}
+    <div class="mt-4 p-3 bg-light rounded-3">
+        <p class="mb-1 fw-semibold"><i class="bi bi-hand-thumbs-up me-1"></i>Think you can fix this?</p>
+        <p class="text-muted small mb-0">Contact the poster through your institution's channels to offer your help.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

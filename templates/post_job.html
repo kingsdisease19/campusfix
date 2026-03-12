@@ -4,9 +4,8 @@
 
 {% block content %}
 <style>
-    /* Form card */
     .form-card {
-        max-width: 600px;
+        max-width: 620px;
         margin: 50px auto 80px;
         background: #fff;
         border-radius: 16px;
@@ -41,6 +40,45 @@
         background: #e8eeff;
         color: #0d6efd;
     }
+
+    /* Image upload drop zone */
+    .upload-zone {
+        border: 2px dashed #ced4da;
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+        position: relative;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+        border-color: #0d6efd;
+        background: #f0f4ff;
+    }
+
+    .upload-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+    }
+
+    .upload-zone .icon {
+        font-size: 2rem;
+        color: #9ca3af;
+        margin-bottom: .5rem;
+    }
+
+    #preview-container img {
+        max-height: 200px;
+        border-radius: 10px;
+        margin-top: 10px;
+        border: 1px solid #e5e7eb;
+    }
 </style>
 
 <div class="form-card">
@@ -56,12 +94,14 @@
         </p>
     </div>
 
-    <form method="POST" action="/post-job">
+    <!-- enctype is required for file uploads -->
+    <form method="POST" action="/post-job" enctype="multipart/form-data">
+
         <!-- Job Title -->
         <div class="mb-3">
             <label for="title" class="form-label fw-semibold">Job Title</label>
             <input type="text" id="title" name="title" class="form-control" placeholder="e.g. Fix my laptop WiFi issue"
-                maxlength="100" required />
+                maxlength="200" required />
             <div class="form-text">Keep it short and clear.</div>
         </div>
 
@@ -108,11 +148,25 @@
         </div>
 
         <!-- Description -->
-        <div class="mb-4">
+        <div class="mb-3">
             <label for="description" class="form-label fw-semibold">Description</label>
             <textarea id="description" name="description" class="form-control" rows="5"
                 placeholder="Describe the problem in detail. The more info you give, the faster you'll get help."
                 required></textarea>
+        </div>
+
+        <!-- Optional Image Upload -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">
+                Problem Photo <span class="text-muted fw-normal">(optional – max 5 MB)</span>
+            </label>
+            <div class="upload-zone" id="uploadZone">
+                <div class="icon"><i class="bi bi-cloud-arrow-up"></i></div>
+                <p class="mb-0 text-muted small">Click or drag &amp; drop a photo here</p>
+                <p class="mb-0 text-muted" style="font-size:.75rem;">PNG, JPG, GIF, WEBP</p>
+                <input type="file" name="image" id="imageInput" accept=".png,.jpg,.jpeg,.gif,.webp" />
+            </div>
+            <div id="preview-container" class="text-center"></div>
         </div>
 
         <!-- Submit -->
@@ -121,4 +175,33 @@
         </button>
     </form>
 </div>
+
+<script>
+    const input = document.getElementById("imageInput");
+    const zone = document.getElementById("uploadZone");
+    const preview = document.getElementById("preview-container");
+
+    input.addEventListener("change", () => showPreview(input.files[0]));
+
+    zone.addEventListener("dragover", e => { e.preventDefault(); zone.classList.add("drag-over"); });
+    zone.addEventListener("dragleave", () => zone.classList.remove("drag-over"));
+    zone.addEventListener("drop", e => {
+        e.preventDefault();
+        zone.classList.remove("drag-over");
+        if (e.dataTransfer.files.length) {
+            input.files = e.dataTransfer.files;
+            showPreview(e.dataTransfer.files[0]);
+        }
+    });
+
+    function showPreview(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview" />
+        <p class="text-muted small mt-1">${file.name}</p>`;
+        };
+        reader.readAsDataURL(file);
+    }
+</script>
 {% endblock %}
